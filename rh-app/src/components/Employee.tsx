@@ -11,6 +11,8 @@ import {
 } from "../interfaces/leaveRequest.interface.ts";
 import type {Attendance} from "../interfaces/attendance.interface.ts";
 
+// TODO: Reformat here with better readability
+
 type Props = {
     employees: Employee[];
     departments?: Department[];
@@ -21,7 +23,6 @@ type Props = {
     title?: string;
 };
 
-// ⚠️ On stocke uniquement l'ID dans la modal, pas l'objet employé
 type ModalState =
     | { type: "none" }
     | { type: "attendance"; employeeId: number }
