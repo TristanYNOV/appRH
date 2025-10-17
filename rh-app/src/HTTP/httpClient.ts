@@ -13,7 +13,7 @@ class HTTPClient {
             headers: {
                 "Content-Type": "application/json",
             },
-            withCredentials: false, // passe à true si tu veux envoyer les cookies
+            withCredentials: false,
         });
 
         // ----------- Intercepteurs -----------

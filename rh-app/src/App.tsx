@@ -117,9 +117,8 @@ function App() {
 
     // Exemple de useEffect de “resync” (à compléter quand l’API sera branchée)
     useEffect(() => {
-        // Ici: tu pourrais recalculer des données dérivées, hydrater employee.department,
-        // ou déclencher une refetch côté API après import.
-    }, [employees, departments]);
+        // TODO: Add All Get To download
+    }, [refreshKey]);
 
     return (
         <div className="min-h-screen bg-gray-100">
