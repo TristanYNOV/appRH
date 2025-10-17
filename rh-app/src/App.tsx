@@ -1,11 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
-import AuthForm from "./components/authLogIn.tsx";
-import TopBar from "./components/topBar.tsx";
-import Departments from "./components/Department.component.tsx";
+import { AuthForm, DepartmentList, EmployeeList, TopBar } from "./components/index.ts";
 import { mockedDepartments as initialMockDepartments } from "./mocks/mockDepartment.ts";
 import { mockedEmployees as initialMockEmployees } from "./mocks/mockEmployees.ts";
-import Employees from "./components/Employee.tsx";
 
 import type { LeaveRequest } from "./interfaces/leaveRequest.interface.ts";
 import type { Employee } from "./interfaces/employee.interface.ts";
@@ -201,7 +198,6 @@ function App() {
                             onClick={() => setDisplayMode("employee")}
                             className="btn flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition"
                             disabled={displayMode === "employee"}
-
                         >
                             Voir les employées
                         </button>
@@ -210,10 +206,10 @@ function App() {
                     {/* --- Contenu --- */}
                     <div className="flex flex-col overflow-y-auto gap-4">
                         {displayMode === "department" && (
-                            <Departments key={`dept-${refreshKey}`} departments={departments} />
+                            <DepartmentList key={`dept-${refreshKey}`} departments={departments} />
                         )}
                         {displayMode === "employee" && (
-                            <Employees
+                            <EmployeeList
                                 key={`emp-${refreshKey}`}
                                 title="Liste des employés"
                                 employees={employees}

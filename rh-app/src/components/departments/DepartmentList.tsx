@@ -1,7 +1,15 @@
 import React, { useMemo, useState } from "react";
 import { FaPlus, FaTrash, FaTimes } from "react-icons/fa";
-import type {Department} from "../interfaces/department.interface.ts";
-import type {Employee} from "../interfaces/employee.interface.ts";
+import type { Department } from "../../interfaces/department.interface.ts";
+import type { Employee } from "../../interfaces/employee.interface.ts";
+
+const emptyEmployees: Employee[] = [];
+
+const createEmptyDepartmentForm = () => ({
+    name: "",
+    code: "",
+    description: "",
+});
 
 type Props = {
     departments: Department[];
@@ -10,20 +18,14 @@ type Props = {
     title?: string;
 };
 
-const emptyEmployees: Employee[] = [];
-
-const Departments: React.FC<Props> = ({
-                                          departments,
-                                          onCreate,
-                                          onDelete,
-                                          title = "Departments",
-                                      }) => {
+const DepartmentList: React.FC<Props> = ({
+    departments,
+    onCreate,
+    onDelete,
+    title = "Departments",
+}) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [form, setForm] = useState({
-        name: "",
-        code: "",
-        description: "",
-    });
+    const [form, setForm] = useState(createEmptyDepartmentForm());
 
     // Simple générateur d'id (remplace-le par ton backend/DB)
     const nextId = useMemo(() => {
@@ -31,7 +33,7 @@ const Departments: React.FC<Props> = ({
         return max + 1;
     }, [departments]);
 
-    const resetForm = () => setForm({ name: "", code: "", description: "" });
+    const resetForm = () => setForm(createEmptyDepartmentForm());
 
     const handleDelete = (id: number) => {
         if (onDelete) onDelete(id);
@@ -202,4 +204,4 @@ const Departments: React.FC<Props> = ({
     );
 };
 
-export default Departments;
+export default DepartmentList;
