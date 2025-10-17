@@ -34,6 +34,11 @@ function App() {
         bumpRefresh();
     };
 
+    const handleUpdateEmployee = (employee: Employee) => {
+        setEmployees((prev) => prev.map((e) => (e.id === employee.id ? employee : e)));
+        bumpRefresh();
+    };
+
     const handleDelete = (id: number) => {
         setEmployees((prev) => prev.filter((e) => e.id !== id));
         bumpRefresh();
@@ -47,6 +52,22 @@ function App() {
                     : e
             )
         );
+        bumpRefresh();
+    };
+
+    // --------- Departments CRUD ----------
+    const handleCreateDepartment = (department: Department) => {
+        setDepartments((prev) => [...prev, department]);
+        bumpRefresh();
+    };
+
+    const handleUpdateDepartment = (department: Department) => {
+        setDepartments((prev) => prev.map((d) => (d.id === department.id ? department : d)));
+        bumpRefresh();
+    };
+
+    const handleDeleteDepartment = (id: number) => {
+        setDepartments((prev) => prev.filter((d) => d.id !== id));
         bumpRefresh();
     };
 
@@ -206,7 +227,13 @@ function App() {
                     {/* --- Contenu --- */}
                     <div className="flex flex-col overflow-y-auto gap-4">
                         {displayMode === "department" && (
-                            <DepartmentList key={`dept-${refreshKey}`} departments={departments} />
+                            <DepartmentList
+                                key={`dept-${refreshKey}`}
+                                departments={departments}
+                                onCreate={handleCreateDepartment}
+                                onUpdate={handleUpdateDepartment}
+                                onDelete={handleDeleteDepartment}
+                            />
                         )}
                         {displayMode === "employee" && (
                             <EmployeeList
@@ -215,6 +242,7 @@ function App() {
                                 employees={employees}
                                 departments={departments}
                                 onCreate={handleCreate}
+                                onUpdate={handleUpdateEmployee}
                                 onDelete={handleDelete}
                                 onCreateLeaveRequest={handleCreateLeaveRequest}
                             />
