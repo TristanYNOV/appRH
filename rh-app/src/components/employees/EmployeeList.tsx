@@ -1,15 +1,50 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus, FaTrash, FaTimes, FaCalendarCheck, FaUmbrellaBeach } from "react-icons/fa";
-import {eGender, type Employee, genderLabel, genderOptions} from "../interfaces/employee.interface.ts";
-import type {Department} from "../interfaces/department.interface.ts";
+import {
+    eGender,
+    type Employee,
+    genderLabel,
+    genderOptions,
+} from "../../interfaces/employee.interface.ts";
+import type { Department } from "../../interfaces/department.interface.ts";
 import {
     type LeaveRequest,
     LeaveStatus,
     leaveStatusRecord,
-    LeaveType, leaveTypeOptions,
+    LeaveType,
+    leaveTypeOptions,
     leaveTypeRecord
-} from "../interfaces/leaveRequest.interface.ts";
-import type {Attendance} from "../interfaces/attendance.interface.ts";
+} from "../../interfaces/leaveRequest.interface.ts";
+import type { Attendance } from "../../interfaces/attendance.interface.ts";
+
+const createEmptyEmployeeForm = () => ({
+    firstName: "",
+    lastName: "",
+    gender: eGender.MALE as eGender,
+    email: "",
+    phone: "",
+    address: "",
+    position: "",
+    salary: "" as string,
+    hireDate: "" as string,
+    departmentId: "" as string,
+});
+
+const createEmptyLeaveForm = () => ({
+    leaveType: LeaveType.Annual as LeaveType,
+    startDate: "" as string,
+    endDate: "" as string,
+    reason: "" as string,
+});
+
+const computeDaysRequested = (startDate: string, endDate: string) => {
+    if (!startDate || !endDate) return 0;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const ms = end.getTime() - start.getTime();
+    if (Number.isNaN(ms)) return 0;
+    return Math.floor(ms / (1000 * 60 * 60 * 24)) + 1;
+};
 
 // TODO: Reformat here with better readability
 
@@ -28,29 +63,26 @@ type ModalState =
     | { type: "attendance"; employeeId: number }
     | { type: "leave"; employeeId: number };
 
-const Employees: React.FC<Props> = ({
-                                        employees,
-                                        departments,
-                                        onCreate,
-                                        onDelete,
-                                        onCreateLeaveRequest,
-                                        title = "Employees",
-                                    }) => {
+const EmployeeList: React.FC<Props> = ({
+    employees,
+    departments,
+    onCreate,
+    onDelete,
+    onCreateLeaveRequest,
+    title = "Employees",
+}) => {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [modal, setModal] = useState<ModalState>({ type: "none" });
 
-    const [form, setForm] = useState({
-        firstName: "",
-        lastName: "",
-        gender: eGender.MALE as eGender,
-        email: "",
-        phone: "",
-        address: "",
-        position: "",
-        salary: "" as string,
-        hireDate: "" as string,
-        departmentId: "" as string,
-    });
+    const [form, setForm] = useState(createEmptyEmployeeForm());
+    const currencyFormatter = useMemo(
+        () => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }),
+        []
+    );
+    const departmentById = useMemo(() => {
+        if (!departments) return new Map<number, Department>();
+        return new Map(departments.map((dept) => [dept.id, dept]));
+    }, [departments]);
 
     // Dérive l'employé sélectionné depuis les props (toujours frais)
     const selectedEmployee: Employee | undefined = useMemo(() => {
@@ -70,19 +102,7 @@ const Employees: React.FC<Props> = ({
         [employees]
     );
 
-    const resetForm = () =>
-        setForm({
-            firstName: "",
-            lastName: "",
-            gender: eGender.MALE,
-            email: "",
-            phone: "",
-            address: "",
-            position: "",
-            salary: "",
-            hireDate: "",
-            departmentId: "",
-        });
+    const resetForm = () => setForm(createEmptyEmployeeForm());
 
     const handleDelete = (id: number) => {
         if (onDelete) onDelete(id);
@@ -123,33 +143,14 @@ const Employees: React.FC<Props> = ({
     };
 
     // ---------- Leave form ----------
-    const [leaveForm, setLeaveForm] = useState({
-        leaveType: LeaveType.Annual as LeaveType,
-        startDate: "" as string,
-        endDate: "" as string,
-        reason: "" as string,
-    });
+    const [leaveForm, setLeaveForm] = useState(createEmptyLeaveForm());
 
     // Remet à zéro le formulaire de congé quand on ouvre/ferme la modal
     useEffect(() => {
         if (modal.type === "leave") {
-            setLeaveForm({
-                leaveType: LeaveType.Annual,
-                startDate: "",
-                endDate: "",
-                reason: "",
-            });
+            setLeaveForm(createEmptyLeaveForm());
         }
     }, [modal]);
-
-    const computeDaysRequested = (startDate: string, endDate: string) => {
-        if (!startDate || !endDate) return 0;
-        const s = new Date(startDate);
-        const e = new Date(endDate);
-        const ms = e.getTime() - s.getTime();
-        if (isNaN(ms)) return 0;
-        return Math.floor(ms / (1000 * 60 * 60 * 24)) + 1;
-    };
 
     const handleCreateLeave = (employeeId: number, e: React.FormEvent) => {
         e.preventDefault();
@@ -231,12 +232,9 @@ const Employees: React.FC<Props> = ({
                                 <td className="px-4 py-3">{e.email}</td>
                                 <td className="px-4 py-3">{e.phone}</td>
                                 <td className="px-4 py-3">{e.position}</td>
+                                <td className="px-4 py-3">{currencyFormatter.format(e.salary)}</td>
                                 <td className="px-4 py-3">
-                                    {new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(e.salary)}
-                                </td>
-                                <td className="px-4 py-3">
-                                    {e.department?.name ??
-                                        (departments?.find((d) => d.id === e.departmentId)?.name ?? `#${e.departmentId}`)}
+                                    {e.department?.name ?? departmentById.get(e.departmentId)?.name ?? `#${e.departmentId}`}
                                 </td>
                                 <td className="px-4 py-3">
                                     {e.hireDate
@@ -609,4 +607,4 @@ const Employees: React.FC<Props> = ({
     );
 };
 
-export default Employees;
+export default EmployeeList;
