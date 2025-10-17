@@ -4,7 +4,7 @@
 import type {Employee} from "../interfaces/employee.interface.ts";
 import apiClient from "./httpClient.ts";
 
-const baseURLEmployee = "employee";
+export const baseURLEmployee = "employee";
 
 export const EmployeeAPI = {
     async getAll(): Promise<Employee[]> {
@@ -15,8 +15,20 @@ export const EmployeeAPI = {
         return apiClient.get<Employee>(`/${baseURLEmployee}/${id}`);
     },
 
+    async getByEmail(email: string): Promise<Employee> {
+        return apiClient.get<Employee>(`/${baseURLEmployee}/by-email//${email}`);
+    },
+
+    async getByDepartmentId(employeeId: number): Promise<Employee> {
+        return apiClient.get<Employee>(`/${baseURLEmployee}/by-department//${employeeId}`);
+    },
+
     async create(employee: Partial<Employee>): Promise<Employee> {
         return apiClient.post<Employee>(`/${baseURLEmployee}`, employee);
+    },
+
+    async update(employee: Partial<Employee>): Promise<Employee> {
+        return apiClient.put<Employee>(`/${baseURLEmployee}`, employee);
     },
 
     async remove(id: number): Promise<void> {

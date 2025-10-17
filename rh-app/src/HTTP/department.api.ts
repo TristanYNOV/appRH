@@ -1,10 +1,7 @@
-// src/api/endpoints/department.api.ts
-
-
 import type {Department} from "../interfaces/department.interface.ts";
 import apiClient from "./httpClient.ts";
 
-const baseURLDepartment = "department";
+export const baseURLDepartment = "department";
 
 export const DepartmentAPI = {
     async getAll(): Promise<Department[]> {
@@ -17,6 +14,10 @@ export const DepartmentAPI = {
 
     async create(department: Partial<Department>): Promise<Department> {
         return apiClient.post<Department>(`/${baseURLDepartment}`, department);
+    },
+
+    async update(department: Partial<Department>): Promise<Department> {
+        return apiClient.put(`/${baseURLDepartment}/${department.id}`, department);
     },
 
     async remove(id: number): Promise<void> {
