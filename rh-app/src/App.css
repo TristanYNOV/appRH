@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+.btn:disabled {
+    @apply cursor-not-allowed;
+    opacity: 0.6;
+    background-color: #2f6598 !important;
+    border-color: #22517c !important;
+    color: #000000 !important;
+}

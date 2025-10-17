@@ -6,8 +6,8 @@ import type {LeaveRequest} from "./leaveRequest.interface.ts";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 export enum eGender {
-    MALE,
-    FEMALE
+    MALE = 1,
+    FEMALE = 2
 }
 
 export const genderOptions = [eGender.MALE, eGender.FEMALE] as const;
