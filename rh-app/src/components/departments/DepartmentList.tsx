@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus, FaTrash, FaPen } from "react-icons/fa";
 import type { Department } from "../../interfaces/department.interface.ts";
 import type { Employee } from "../../interfaces/employee.interface.ts";
@@ -13,6 +13,8 @@ type Props = {
     onCreate?: (dept: Department) => void;
     onUpdate?: (dept: Department) => void;
     onDelete?: (id: number) => void;
+    isLoading?: boolean;
+    actionsDisabled?: boolean;
     title?: string;
 };
 
@@ -21,11 +23,19 @@ const DepartmentList: React.FC<Props> = ({
     onCreate,
     onUpdate,
     onDelete,
+    isLoading = false,
+    actionsDisabled = false,
     title = "Departments",
 }) => {
     const [modal, setModal] = useState<
         { mode: "create" } | { mode: "update"; departmentId: number }
     >();
+
+    useEffect(() => {
+        if (actionsDisabled) {
+            setModal(undefined);
+        }
+    }, [actionsDisabled]);
 
     const nextId = useMemo(() => {
         const max = departments.reduce((m, d) => Math.max(m, d.id), 0);
@@ -90,8 +100,14 @@ const DepartmentList: React.FC<Props> = ({
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-semibold">{title}</h2>
                 <button
-                    onClick={() => setModal({ mode: "create" })}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"
+                    onClick={() => {
+                        if (actionsDisabled) return;
+                        setModal({ mode: "create" });
+                    }}
+                    disabled={actionsDisabled}
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50${
+                        actionsDisabled ? " opacity-60 cursor-not-allowed" : ""
+                    }`}
                 >
                     <FaPlus />
                     Nouveau
@@ -111,7 +127,13 @@ const DepartmentList: React.FC<Props> = ({
                         </tr>
                     </thead>
                     <tbody>
-                        {departments.length === 0 ? (
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
+                                    Chargement des départements…
+                                </td>
+                            </tr>
+                        ) : departments.length === 0 ? (
                             <tr>
                                 <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
                                     Aucun département pour le moment.
@@ -128,16 +150,28 @@ const DepartmentList: React.FC<Props> = ({
                                     <td className="px-4 py-3">
                                         <div className="flex justify-end gap-2">
                                             <button
-                                                onClick={() => setModal({ mode: "update", departmentId: dept.id })}
-                                                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100"
+                                                onClick={() => {
+                                                    if (actionsDisabled) return;
+                                                    setModal({ mode: "update", departmentId: dept.id });
+                                                }}
+                                                disabled={actionsDisabled}
+                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100${
+                                                    actionsDisabled ? " opacity-60 cursor-not-allowed" : ""
+                                                }`}
                                                 aria-label={`Modifier ${dept.name}`}
                                                 title="Modifier"
                                             >
                                                 <FaPen />
                                             </button>
                                             <button
-                                                onClick={() => handleDelete(dept.id)}
-                                                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"
+                                                onClick={() => {
+                                                    if (actionsDisabled) return;
+                                                    handleDelete(dept.id);
+                                                }}
+                                                disabled={actionsDisabled}
+                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100${
+                                                    actionsDisabled ? " opacity-60 cursor-not-allowed" : ""
+                                                }`}
                                                 aria-label={`Supprimer ${dept.name}`}
                                                 title="Supprimer"
                                             >
