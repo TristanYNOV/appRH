@@ -51,6 +51,18 @@ export const useFileTransfers = ({
         [onAvailabilityChange, updateAvailability]
     );
 
+    const checkAvailability = useCallback(async () => {
+        try {
+            await FileAPI.checkAvailability();
+            syncAvailability(true);
+            return true;
+        } catch (error) {
+            console.error("[IMPORT/EXPORT] Vérification de l'API échouée", error);
+            syncAvailability(false);
+            return false;
+        }
+    }, [syncAvailability]);
+
     const importEmployees = useCallback(
         async (file: File) => {
             setIsImportingEmployees(true);
@@ -141,6 +153,7 @@ export const useFileTransfers = ({
         importDepartments,
         exportEmployees,
         exportDepartments,
+        checkAvailability,
         reset: () => {
             setIsImportingEmployees(false);
             setIsImportingDepartments(false);

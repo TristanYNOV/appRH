@@ -17,6 +17,10 @@ export const toastService = {
 
     apiUnavailable: (feature: string) => toast.error(`Fonctionnalité indisponible : ${feature}`),
     apiRestored: (feature: string) => toast.success(`Fonctionnalité rétablie : ${feature}`),
+    apiReconnectAttempt: () => toast.loading("Tentative de reconnexion à l'API…"),
+    apiReconnectSuccess: () => toast.success("Reconnexion à l'API réussie !"),
+    apiReconnectFailed: (message?: string) =>
+        toast.error(message ? `La reconnexion a échoué : ${message}` : "La reconnexion a échoué."),
 
     // EMPLOYEE
     employeeSyncFailed: (message: string) => toast.error(`Synchronisation des employés impossible : ${message}`),
