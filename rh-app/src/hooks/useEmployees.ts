@@ -17,9 +17,13 @@ export const useEmployees = ({ enabled, onAvailabilityChange }: Options) => {
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
+    const handleUnavailable = useCallback(() => {
+        setEmployees([]);
+    }, []);
+
     const { isAvailable, updateAvailability, resetAvailability } = useApiAvailability({
         label: "API Employés",
-        onUnavailable: () => setEmployees([]),
+        onUnavailable: handleUnavailable,
     });
 
     const [refreshKey, setRefreshKey] = useState(0);

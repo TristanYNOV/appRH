@@ -17,9 +17,13 @@ export const useDepartments = ({ enabled, onAvailabilityChange }: Options) => {
     const [departments, setDepartments] = useState<Department[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
+    const handleUnavailable = useCallback(() => {
+        setDepartments([]);
+    }, []);
+
     const { isAvailable, updateAvailability, resetAvailability } = useApiAvailability({
         label: "API Départements",
-        onUnavailable: () => setDepartments([]),
+        onUnavailable: handleUnavailable,
     });
 
     const [refreshKey, setRefreshKey] = useState(0);
