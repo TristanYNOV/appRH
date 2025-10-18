@@ -209,7 +209,7 @@ function App() {
                 />
             )}
 
-            <Toaster position="top-center" />
+            <Toaster position="top-left" />
         </div>
     );
 }
