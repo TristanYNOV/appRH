@@ -1,4 +1,4 @@
-import { useRef, type ChangeEvent } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
 import { Toaster } from "react-hot-toast";
 
 import "./App.css";
@@ -21,6 +21,7 @@ const LEAVE_API_AVAILABLE = false;
 function App() {
     const auth = useAuthState();
     const dashboard = useDashboardState(auth.isAuthenticated);
+    const [isReconnectingApis, setIsReconnectingApis] = useState(false);
     const missingFeatures = [
         !ATTENDANCE_API_AVAILABLE ? "présences" : null,
         !LEAVE_API_AVAILABLE ? "demandes d'absence" : null,
@@ -42,6 +43,11 @@ function App() {
         !ATTENDANCE_API_AVAILABLE || !dashboard.isEmployeeApiAvailable;
     const disableLeaveActions =
         !LEAVE_API_AVAILABLE || !dashboard.isEmployeeApiAvailable;
+
+    const hasApiIssue =
+        !dashboard.isEmployeeApiAvailable ||
+        !dashboard.isDepartmentApiAvailable ||
+        !dashboard.isFileApiAvailable;
 
     const handleAuth = async (email: string, password: string, mode: "login" | "signup") => {
         const toastId = toastService.authAttempt();
@@ -118,9 +124,40 @@ function App() {
         toastService.featureUnavailable("Les demandes d'absence");
     };
 
+    const handleReconnectApis = async () => {
+        if (!auth.isAuthenticated || isReconnectingApis) {
+            return;
+        }
+
+        setIsReconnectingApis(true);
+        const toastId = toastService.apiReconnectAttempt();
+        try {
+            const success = await dashboard.reconnectApis();
+            toastService.dismiss(toastId);
+            if (success) {
+                toastService.apiReconnectSuccess();
+            } else {
+                toastService.apiReconnectFailed();
+            }
+        } catch (error) {
+            toastService.dismiss(toastId);
+            toastService.apiReconnectFailed(extractErrorMessage(error));
+        } finally {
+            setIsReconnectingApis(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-100">
-            <TopBar logIn={auth.isAuthenticated} onOpenAuth={auth.openAuth} onLogout={handleLogout} />
+            <TopBar
+                logIn={auth.isAuthenticated}
+                onOpenAuth={auth.openAuth}
+                onLogout={handleLogout}
+                onReconnect={handleReconnectApis}
+                canReconnect={auth.isAuthenticated}
+                isReconnecting={isReconnectingApis}
+                hasApiIssue={hasApiIssue}
+            />
 
             {!auth.isAuthenticated && auth.authMode === null && (
                 <div className="flex flex-col justify-center w-full h-80 items-center">
@@ -172,7 +209,7 @@ function App() {
                 />
             )}
 
-            <Toaster position="top-center" />
+            <Toaster position="top-left" />
         </div>
     );
 }

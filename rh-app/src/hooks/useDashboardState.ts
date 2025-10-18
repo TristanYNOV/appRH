@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { useEmployees } from "./useEmployees.ts";
 import { useDepartments } from "./useDepartments.ts";
@@ -18,6 +18,7 @@ export const useDashboardState = (isAuthenticated: boolean) => {
         deleteEmployee,
         refresh: refreshEmployees,
         reset: resetEmployees,
+        checkAvailability: checkEmployeeAvailability,
     } = useEmployees({
         enabled: isAuthenticated,
     });
@@ -31,6 +32,7 @@ export const useDashboardState = (isAuthenticated: boolean) => {
         deleteDepartment,
         refresh: refreshDepartments,
         reset: resetDepartments,
+        checkAvailability: checkDepartmentAvailability,
     } = useDepartments({
         enabled: isAuthenticated,
     });
@@ -46,10 +48,21 @@ export const useDashboardState = (isAuthenticated: boolean) => {
         exportEmployees,
         exportDepartments,
         reset: resetFileTransfers,
+        checkAvailability: checkFileAvailability,
     } = useFileTransfers({
         onEmployeesUpdated: refreshEmployees,
         onDepartmentsUpdated: refreshDepartments,
     });
+
+    const reconnectApis = useCallback(async () => {
+        const [employeeAvailable, departmentAvailable, fileAvailable] = await Promise.all([
+            checkEmployeeAvailability(),
+            checkDepartmentAvailability(),
+            checkFileAvailability(),
+        ]);
+
+        return employeeAvailable && departmentAvailable && fileAvailable;
+    }, [checkDepartmentAvailability, checkEmployeeAvailability, checkFileAvailability]);
 
     const reset = () => {
         setDisplayMode("employee");
@@ -84,6 +97,7 @@ export const useDashboardState = (isAuthenticated: boolean) => {
         exportDepartments,
         refreshEmployees,
         refreshDepartments,
+        reconnectApis,
         reset,
     } as const;
 };

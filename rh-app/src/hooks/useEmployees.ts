@@ -42,6 +42,22 @@ export const useEmployees = ({ enabled, onAvailabilityChange }: Options) => {
         [onAvailabilityChange, updateAvailability]
     );
 
+    const checkAvailability = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const data = await EmployeeAPI.getAll();
+            setEmployees(data.map(normalizeEmployee));
+            syncAvailability(true);
+            return true;
+        } catch (error) {
+            toastService.employeeSyncFailed(extractErrorMessage(error));
+            syncAvailability(false);
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
+    }, [syncAvailability]);
+
     useEffect(() => {
         if (!enabled) {
             setEmployees([]);
@@ -155,6 +171,7 @@ export const useEmployees = ({ enabled, onAvailabilityChange }: Options) => {
         updateEmployee,
         deleteEmployee,
         refresh: bumpRefresh,
+        checkAvailability,
         reset: () => {
             setEmployees([]);
             setIsLoading(false);

@@ -42,6 +42,22 @@ export const useDepartments = ({ enabled, onAvailabilityChange }: Options) => {
         [onAvailabilityChange, updateAvailability]
     );
 
+    const checkAvailability = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const data = await DepartmentAPI.getAll();
+            setDepartments(data.map(normalizeDepartment));
+            syncAvailability(true);
+            return true;
+        } catch (error) {
+            toastService.departmentSyncFailed(extractErrorMessage(error));
+            syncAvailability(false);
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
+    }, [syncAvailability]);
+
     useEffect(() => {
         if (!enabled) {
             setDepartments([]);
@@ -151,6 +167,7 @@ export const useDepartments = ({ enabled, onAvailabilityChange }: Options) => {
         updateDepartment,
         deleteDepartment,
         refresh: bumpRefresh,
+        checkAvailability,
         reset: () => {
             setDepartments([]);
             setIsLoading(false);

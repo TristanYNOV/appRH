@@ -85,6 +85,10 @@ class HTTPClient {
         const res: AxiosResponse<T> = await this.client.delete(url, config);
         return res.data;
     }
+
+    public async head(url: string, config?: AxiosRequestConfig): Promise<void> {
+        await this.client.head(url, config);
+    }
 }
 
 const apiClient = new HTTPClient();
