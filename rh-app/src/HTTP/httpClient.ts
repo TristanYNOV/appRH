@@ -1,6 +1,7 @@
 // src/api/HTTPClient.ts
 
 import axios, {type AxiosInstance, type AxiosRequestConfig, type AxiosResponse} from "axios";
+import {authService} from "../services/auth.service.ts";
 
 const baseURL = "http://localhost:5171/api";
 
@@ -20,7 +21,7 @@ class HTTPClient {
         this.client.interceptors.request.use(
             (config) => {
                 // Exemple : ajout du token JWT automatiquement
-                const token = localStorage.getItem("token");
+                const token = authService.getToken();
                 if (token) {
                     config.headers.Authorization = `Bearer ${token}`;
                 }

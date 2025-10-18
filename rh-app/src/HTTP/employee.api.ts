@@ -16,11 +16,11 @@ export const EmployeeAPI = {
     },
 
     async getByEmail(email: string): Promise<Employee> {
-        return apiClient.get<Employee>(`/${baseURLEmployee}/by-email//${email}`);
+        return apiClient.get<Employee>(`/${baseURLEmployee}/by-email/${email}`);
     },
 
     async getByDepartmentId(employeeId: number): Promise<Employee> {
-        return apiClient.get<Employee>(`/${baseURLEmployee}/by-department//${employeeId}`);
+        return apiClient.get<Employee>(`/${baseURLEmployee}/by-department/${employeeId}`);
     },
 
     async create(employee: Partial<Employee>): Promise<Employee> {

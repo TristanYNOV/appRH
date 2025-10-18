@@ -1,148 +1,128 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, type ChangeEvent } from "react";
+import { Toaster } from "react-hot-toast";
+
 import "./App.css";
-import { AuthForm, DepartmentList, EmployeeList, TopBar } from "./components/index.ts";
-import { mockedDepartments as initialMockDepartments } from "./mocks/mockDepartment.ts";
-import { mockedEmployees as initialMockEmployees } from "./mocks/mockEmployees.ts";
+import { AuthForm, TopBar } from "./components/index.ts";
+import authService from "./services/auth.service.ts";
+import { toastService } from "./services/toasts.service.ts";
+import { useAuthState } from "./hooks/useAuthState.ts";
+import { useDashboardState } from "./hooks/useDashboardState.ts";
+import { useFeatureReminder } from "./hooks/useFeatureReminder.ts";
+import DashboardLayout from "./components/dashboard/DashboardLayout.tsx";
+import { extractErrorMessage } from "./utils/errorHandling.ts";
 
 import type { LeaveRequest } from "./interfaces/leaveRequest.interface.ts";
 import type { Employee } from "./interfaces/employee.interface.ts";
 import type { Department } from "./interfaces/department.interface.ts";
-import { Toaster, toast } from "react-hot-toast";
+
+const ATTENDANCE_API_AVAILABLE = false;
+const LEAVE_API_AVAILABLE = false;
 
 function App() {
-    const [logIn, setLogIn] = useState(false);
-    const [authMode, setAuthMode] = useState<"login" | "signup" | null>(null);
-    const [displayMode, setDisplayMode] = useState<"employee" | "department">("employee");
+    const auth = useAuthState();
+    const dashboard = useDashboardState(auth.isAuthenticated);
+    const missingFeatures = [
+        !ATTENDANCE_API_AVAILABLE ? "présences" : null,
+        !LEAVE_API_AVAILABLE ? "demandes d'absence" : null,
+    ].filter((feature): feature is string => feature !== null);
+    const featureReminder = useFeatureReminder(auth.isAuthenticated, missingFeatures);
 
-    const [employees, setEmployees] = useState<Employee[]>(initialMockEmployees);
-    const [departments, setDepartments] = useState<Department[]>(initialMockDepartments);
+    const employeeFileInputRef = useRef<HTMLInputElement | null>(null);
+    const departmentFileInputRef = useRef<HTMLInputElement | null>(null);
 
-    // Optionnel: si certains enfants gardent un état interne, on peut forcer un re-mount
-    const [refreshKey, setRefreshKey] = useState(0);
-    const bumpRefresh = () => setRefreshKey((k) => k + 1);
+    const disableEmployeeImport =
+        !dashboard.isFileApiAvailable || dashboard.isImportingEmployees;
+    const disableDepartmentImport =
+        !dashboard.isFileApiAvailable || dashboard.isImportingDepartments;
+    const disableEmployeeExport =
+        !dashboard.isFileApiAvailable || dashboard.isExportingEmployees;
+    const disableDepartmentExport =
+        !dashboard.isFileApiAvailable || dashboard.isExportingDepartments;
+    const disableAttendanceActions =
+        !ATTENDANCE_API_AVAILABLE || !dashboard.isEmployeeApiAvailable;
+    const disableLeaveActions =
+        !LEAVE_API_AVAILABLE || !dashboard.isEmployeeApiAvailable;
 
-    // --------- Auth ----------
-    const handleAuth = (email: string, password: string, mode: "login" | "signup") => {
-        console.log("Auth:", { email, password, mode });
-        setLogIn(true);
-        setAuthMode(null);
-    };
-
-    // --------- Employees CRUD ----------
-    const handleCreate = (emp: Employee) => {
-        setEmployees((prev) => [...prev, emp]);
-        bumpRefresh();
-    };
-
-    const handleUpdateEmployee = (employee: Employee) => {
-        setEmployees((prev) => prev.map((e) => (e.id === employee.id ? employee : e)));
-        bumpRefresh();
-    };
-
-    const handleDelete = (id: number) => {
-        setEmployees((prev) => prev.filter((e) => e.id !== id));
-        bumpRefresh();
-    };
-
-    const handleCreateLeaveRequest = (employeeId: number, leave: LeaveRequest) => {
-        setEmployees((prev) =>
-            prev.map((e) =>
-                e.id === employeeId
-                    ? { ...e, leaveRequests: [...(e.leaveRequests ?? []), leave] }
-                    : e
-            )
-        );
-        bumpRefresh();
-    };
-
-    // --------- Departments CRUD ----------
-    const handleCreateDepartment = (department: Department) => {
-        setDepartments((prev) => [...prev, department]);
-        bumpRefresh();
-    };
-
-    const handleUpdateDepartment = (department: Department) => {
-        setDepartments((prev) => prev.map((d) => (d.id === department.id ? department : d)));
-        bumpRefresh();
-    };
-
-    const handleDeleteDepartment = (id: number) => {
-        setDepartments((prev) => prev.filter((d) => d.id !== id));
-        bumpRefresh();
-    };
-
-    // --------- IMPORT / EXPORT (placeholder API) ----------
-    // Inputs fichiers cachés
-    const empFileInputRef = useRef<HTMLInputElement | null>(null);
-    const deptFileInputRef = useRef<HTMLInputElement | null>(null);
-
-    const triggerEmployeeImport = () => empFileInputRef.current?.click();
-    const triggerDepartmentImport = () => deptFileInputRef.current?.click();
-
-    // Utilitaire pour logguer quelques infos utiles sur le fichier
-    const logFileInfo = async (file: File) => {
-        console.log("[IMPORT] Fichier:", {
-            name: file.name,
-            size: `${file.size} bytes`,
-            type: file.type || "(no mime type)",
-            lastModified: new Date(file.lastModified).toISOString(),
-        });
-
+    const handleAuth = async (email: string, password: string, mode: "login" | "signup") => {
+        const toastId = toastService.authAttempt();
         try {
-            // Optionnel: lire quelques octets (debug)
-            const buf = await file.slice(0, 16).arrayBuffer();
-            const bytes = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0"));
-            console.log("[IMPORT] Premiers octets (hex):", bytes.join(" "));
-        } catch (e) {
-            console.warn("[IMPORT] Impossible de lire l’aperçu binaire:", e);
+            const mockToken = window.btoa(`${email}:${password}:${mode}:${Date.now()}`);
+            authService.storeToken(mockToken);
+            auth.login();
+            auth.closeAuth();
+            toastService.dismiss(toastId);
+            toastService.authSuccess();
+        } catch (error) {
+            toastService.dismiss(toastId);
+            toastService.authFailed(extractErrorMessage(error));
         }
     };
 
-    // Import Employés: on ne fait que logger
-    const onImportEmployees = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        e.target.value = ""; // reset pour pouvoir re-sélectionner le même fichier plus tard
+    const handleLogout = () => {
+        authService.clearToken();
+        auth.logout();
+        auth.closeAuth();
+        dashboard.reset();
+        featureReminder.reset();
+    };
+
+    const triggerEmployeeImport = () => {
+        if (disableEmployeeImport) return;
+        employeeFileInputRef.current?.click();
+    };
+
+    const triggerDepartmentImport = () => {
+        if (disableDepartmentImport) return;
+        departmentFileInputRef.current?.click();
+    };
+
+    const onImportEmployees = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        event.target.value = "";
         if (!file) return;
-        await logFileInfo(file);
-        toast.success("Fichier employés sélectionné (voir console)");
-        // 👉 Plus tard : appeler ton API d'import
+        await dashboard.importEmployees(file);
     };
 
-    // Import Départements: on ne fait que logger
-    const onImportDepartments = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        e.target.value = "";
+    const onImportDepartments = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        event.target.value = "";
         if (!file) return;
-        await logFileInfo(file);
-        toast.success("Fichier départements sélectionné (voir console)");
-        // 👉 Plus tard : appeler ton API d'import
+        await dashboard.importDepartments(file);
     };
 
-    // Export (placeholder) : on log seulement l'intention pour l’instant
-    const exportEmployees = () => {
-        console.log("[EXPORT] Demande d’export des employés (à déléguer à l’API).", {
-            count: employees.length,
-        });
-        toast("Export employés demandé (API à venir)");
+    const handleCreateEmployee = async (employee: Employee) => {
+        await dashboard.createEmployee(employee);
     };
 
-    const exportDepartments = () => {
-        console.log("[EXPORT] Demande d’export des départements (à déléguer à l’API).", {
-            count: departments.length,
-        });
-        toast("Export départements demandé (API à venir)");
+    const handleUpdateEmployee = async (employee: Employee) => {
+        await dashboard.updateEmployee(employee);
     };
 
-    // Exemple de useEffect de “resync” (à compléter quand l’API sera branchée)
-    useEffect(() => {
-        // TODO: Add All Get To download
-    }, [refreshKey]);
+    const handleDeleteEmployee = async (id: number) => {
+        await dashboard.deleteEmployee(id);
+    };
+
+    const handleCreateDepartment = async (department: Department) => {
+        await dashboard.createDepartment(department);
+    };
+
+    const handleUpdateDepartment = async (department: Department) => {
+        await dashboard.updateDepartment(department);
+    };
+
+    const handleDeleteDepartment = async (id: number) => {
+        await dashboard.deleteDepartment(id);
+    };
+
+    const handleCreateLeaveRequest = (_employeeId: number, _leave: LeaveRequest) => {
+        toastService.featureUnavailable("Les demandes d'absence");
+    };
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <TopBar logIn={logIn} setLogIn={setLogIn} onOpenAuth={setAuthMode} />
+            <TopBar logIn={auth.isAuthenticated} onOpenAuth={auth.openAuth} onLogout={handleLogout} />
 
-            {!logIn && authMode === null && (
+            {!auth.isAuthenticated && auth.authMode === null && (
                 <div className="flex flex-col justify-center w-full h-80 items-center">
                     <span className="text-center">Merci de vous authentifier !</span>
                     <div className="flex gap-4 mt-8">
@@ -156,99 +136,40 @@ function App() {
                 </div>
             )}
 
-            {!logIn && authMode && <AuthForm onSubmit={handleAuth} />}
+            {!auth.isAuthenticated && auth.authMode && <AuthForm onSubmit={handleAuth} />}
 
-            {logIn && (
-                <div className="flex flex-col gap-2 mt-4">
-                    {/* --- Barre d’actions Import/Export (auth only) --- */}
-                    <div className="flex flex-wrap justify-center gap-3 mt-4 px-4">
-                        <button
-                            onClick={triggerEmployeeImport}
-                            className="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"
-                            title="Importer Excel employés"
-                        >
-                            Importer Excel — Employés
-                        </button>
-                        <button
-                            onClick={triggerDepartmentImport}
-                            className="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"
-                            title="Importer Excel départements"
-                        >
-                            Importer Excel — Départements
-                        </button>
-                        <button
-                            onClick={exportEmployees}
-                            className="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
-                            title="Exporter les employés"
-                        >
-                            Exporter Excel — Employés
-                        </button>
-                        <button
-                            onClick={exportDepartments}
-                            className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700"
-                            title="Exporter les départements"
-                        >
-                            Exporter Excel — Départements
-                        </button>
-
-                        {/* Inputs fichiers cachés */}
-                        <input
-                            ref={empFileInputRef}
-                            type="file"
-                            accept=".xlsx,.xls,.csv"
-                            className="hidden"
-                            onChange={onImportEmployees}
-                        />
-                        <input
-                            ref={deptFileInputRef}
-                            type="file"
-                            accept=".xlsx,.xls,.csv"
-                            className="hidden"
-                            onChange={onImportDepartments}
-                        />
-                    </div>
-                    <div className="flex w-full justify-center gap-2 mt-16">
-                        <button
-                            className="btn flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition"
-                            onClick={() => setDisplayMode("department")}
-                            disabled={displayMode === "department"}
-                        >
-                            Voir les départements
-                        </button>
-                        <button
-                            onClick={() => setDisplayMode("employee")}
-                            className="btn flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition"
-                            disabled={displayMode === "employee"}
-                        >
-                            Voir les employées
-                        </button>
-                    </div>
-
-                    {/* --- Contenu --- */}
-                    <div className="flex flex-col overflow-y-auto gap-4">
-                        {displayMode === "department" && (
-                            <DepartmentList
-                                key={`dept-${refreshKey}`}
-                                departments={departments}
-                                onCreate={handleCreateDepartment}
-                                onUpdate={handleUpdateDepartment}
-                                onDelete={handleDeleteDepartment}
-                            />
-                        )}
-                        {displayMode === "employee" && (
-                            <EmployeeList
-                                key={`emp-${refreshKey}`}
-                                title="Liste des employés"
-                                employees={employees}
-                                departments={departments}
-                                onCreate={handleCreate}
-                                onUpdate={handleUpdateEmployee}
-                                onDelete={handleDelete}
-                                onCreateLeaveRequest={handleCreateLeaveRequest}
-                            />
-                        )}
-                    </div>
-                </div>
+            {auth.isAuthenticated && (
+                <DashboardLayout
+                    displayMode={dashboard.displayMode}
+                    onDisplayModeChange={(mode) => dashboard.setDisplayMode(mode)}
+                    employees={dashboard.employees}
+                    departments={dashboard.departments}
+                    isLoadingEmployees={dashboard.isLoadingEmployees}
+                    isLoadingDepartments={dashboard.isLoadingDepartments}
+                    isEmployeeApiAvailable={dashboard.isEmployeeApiAvailable}
+                    isDepartmentApiAvailable={dashboard.isDepartmentApiAvailable}
+                    onCreateEmployee={handleCreateEmployee}
+                    onUpdateEmployee={handleUpdateEmployee}
+                    onDeleteEmployee={handleDeleteEmployee}
+                    onCreateDepartment={handleCreateDepartment}
+                    onUpdateDepartment={handleUpdateDepartment}
+                    onDeleteDepartment={handleDeleteDepartment}
+                    onCreateLeaveRequest={handleCreateLeaveRequest}
+                    onEmployeeImportClick={triggerEmployeeImport}
+                    onDepartmentImportClick={triggerDepartmentImport}
+                    onExportEmployees={dashboard.exportEmployees}
+                    onExportDepartments={dashboard.exportDepartments}
+                    onEmployeeFileChange={onImportEmployees}
+                    onDepartmentFileChange={onImportDepartments}
+                    employeeFileInputRef={employeeFileInputRef}
+                    departmentFileInputRef={departmentFileInputRef}
+                    disableEmployeeImport={disableEmployeeImport}
+                    disableDepartmentImport={disableDepartmentImport}
+                    disableEmployeeExport={disableEmployeeExport}
+                    disableDepartmentExport={disableDepartmentExport}
+                    disableAttendanceActions={disableAttendanceActions}
+                    disableLeaveActions={disableLeaveActions}
+                />
             )}
 
             <Toaster position="top-center" />

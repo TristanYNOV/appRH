@@ -16,6 +16,10 @@ type Props = {
     onDelete?: (id: number) => void;
     onCreateLeaveRequest?: (employeeId: number, leave: LeaveRequest) => void;
     onCreateAttendance?: (employeeId: number, attendance: Attendance) => void;
+    isLoading?: boolean;
+    disableCrudActions?: boolean;
+    disableAttendanceActions?: boolean;
+    disableLeaveActions?: boolean;
     title?: string;
 };
 
@@ -31,6 +35,10 @@ const EmployeeList: React.FC<Props> = ({
     onUpdate,
     onDelete,
     onCreateLeaveRequest,
+    isLoading = false,
+    disableCrudActions = false,
+    disableAttendanceActions = false,
+    disableLeaveActions = false,
     title = "Employees",
 }) => {
     const [employeeForm, setEmployeeForm] = useState<
@@ -51,6 +59,24 @@ const EmployeeList: React.FC<Props> = ({
         if (modal.type === "none") return undefined;
         return employees.find((e) => e.id === modal.employeeId);
     }, [modal, employees]);
+
+    useEffect(() => {
+        if (disableCrudActions) {
+            setEmployeeForm(undefined);
+        }
+    }, [disableCrudActions]);
+
+    useEffect(() => {
+        if (disableAttendanceActions && modal.type === "attendance") {
+            setModal({ type: "none" });
+        }
+    }, [disableAttendanceActions, modal.type]);
+
+    useEffect(() => {
+        if (disableLeaveActions && modal.type === "leave") {
+            setModal({ type: "none" });
+        }
+    }, [disableLeaveActions, modal.type]);
 
     useEffect(() => {
         if (modal.type !== "none" && !selectedEmployee) {
@@ -160,8 +186,14 @@ const EmployeeList: React.FC<Props> = ({
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-semibold">{title}</h2>
                 <button
-                    onClick={() => setEmployeeForm({ mode: "create" })}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"
+                    onClick={() => {
+                        if (disableCrudActions) return;
+                        setEmployeeForm({ mode: "create" });
+                    }}
+                    disabled={disableCrudActions}
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50${
+                        disableCrudActions ? " opacity-60 cursor-not-allowed" : ""
+                    }`}
                 >
                     <FaPlus />
                     Nouveau
@@ -186,7 +218,13 @@ const EmployeeList: React.FC<Props> = ({
                         </tr>
                     </thead>
                     <tbody>
-                        {employees.length === 0 ? (
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan={11} className="px-4 py-6 text-center text-gray-500">
+                                    Chargement des employés…
+                                </td>
+                            </tr>
+                        ) : employees.length === 0 ? (
                             <tr>
                                 <td colSpan={11} className="px-4 py-6 text-center text-gray-500">
                                     Aucun employé pour le moment.
@@ -216,31 +254,55 @@ const EmployeeList: React.FC<Props> = ({
                                     <td className="px-4 py-3">
                                         <div className="flex justify-end gap-2">
                                             <button
-                                                onClick={() => setEmployeeForm({ mode: "update", employeeId: employee.id })}
-                                                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100"
+                                                onClick={() => {
+                                                    if (disableCrudActions) return;
+                                                    setEmployeeForm({ mode: "update", employeeId: employee.id });
+                                                }}
+                                                disabled={disableCrudActions}
+                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100${
+                                                    disableCrudActions ? " opacity-60 cursor-not-allowed" : ""
+                                                }`}
                                                 title="Modifier"
                                             >
                                                 <FaPen />
                                             </button>
                                             <button
-                                                onClick={() => setModal({ type: "attendance", employeeId: employee.id })}
-                                                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                                                onClick={() => {
+                                                    if (disableAttendanceActions) return;
+                                                    setModal({ type: "attendance", employeeId: employee.id });
+                                                }}
+                                                disabled={disableAttendanceActions}
+                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100${
+                                                    disableAttendanceActions ? " opacity-60 cursor-not-allowed" : ""
+                                                }`}
                                                 title="Voir présences"
                                             >
                                                 <FaCalendarCheck />
                                                 Présences
                                             </button>
                                             <button
-                                                onClick={() => setModal({ type: "leave", employeeId: employee.id })}
-                                                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100"
+                                                onClick={() => {
+                                                    if (disableLeaveActions) return;
+                                                    setModal({ type: "leave", employeeId: employee.id });
+                                                }}
+                                                disabled={disableLeaveActions}
+                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100${
+                                                    disableLeaveActions ? " opacity-60 cursor-not-allowed" : ""
+                                                }`}
                                                 title="Voir/Faire une demande de congé"
                                             >
                                                 <FaUmbrellaBeach />
                                                 Congés
                                             </button>
                                             <button
-                                                onClick={() => handleDelete(employee.id)}
-                                                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"
+                                                onClick={() => {
+                                                    if (disableCrudActions) return;
+                                                    handleDelete(employee.id);
+                                                }}
+                                                disabled={disableCrudActions}
+                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100${
+                                                    disableCrudActions ? " opacity-60 cursor-not-allowed" : ""
+                                                }`}
                                                 title="Supprimer"
                                             >
                                                 <FaTrash />

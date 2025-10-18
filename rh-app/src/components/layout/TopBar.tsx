@@ -3,11 +3,11 @@ import { FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
 
 interface TopBarProps {
     logIn: boolean;
-    setLogIn: React.Dispatch<React.SetStateAction<boolean>>;
     onOpenAuth: (mode: "login" | "signup") => void;
+    onLogout: () => void;
 }
 
-const TopBar: React.FC<TopBarProps> = ({ logIn, setLogIn, onOpenAuth }) => (
+const TopBar: React.FC<TopBarProps> = ({ logIn, onOpenAuth, onLogout }) => (
     <nav className="w-full bg-white shadow-md px-6 py-3 flex justify-between items-center">
         <h1 className="text-2xl font-bold text-blue-600 cursor-pointer">RH - Application</h1>
 
@@ -22,7 +22,7 @@ const TopBar: React.FC<TopBarProps> = ({ logIn, setLogIn, onOpenAuth }) => (
                 </button>
             ) : (
                 <button
-                    onClick={() => setLogIn(false)}
+                    onClick={onLogout}
                     className="flex items-center gap-2 bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition"
                 >
                     <FaSignOutAlt />
