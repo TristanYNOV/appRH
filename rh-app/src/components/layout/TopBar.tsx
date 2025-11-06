@@ -1,5 +1,5 @@
 import React from "react";
-import { FaSignInAlt, FaSignOutAlt, FaSync } from "react-icons/fa";
+import { FaSignInAlt, FaSignOutAlt, FaSync, FaCog } from "react-icons/fa";
 
 interface TopBarProps {
     logIn: boolean;
@@ -9,6 +9,7 @@ interface TopBarProps {
     canReconnect: boolean;
     isReconnecting: boolean;
     hasApiIssue: boolean;
+    onOpenApiSettings: () => void;
 }
 
 const TopBar: React.FC<TopBarProps> = ({
@@ -19,10 +20,19 @@ const TopBar: React.FC<TopBarProps> = ({
     canReconnect,
     isReconnecting,
     hasApiIssue,
+    onOpenApiSettings,
 }) => (
     <nav className="w-full bg-white shadow-md px-6 py-3 flex justify-between items-center">
         <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold text-blue-600 cursor-pointer">RH - Application</h1>
+            <button
+                type="button"
+                onClick={onOpenApiSettings}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 transition"
+            >
+                <FaCog />
+                <span>Configurer l&apos;API</span>
+            </button>
             <button
                 type="button"
                 onClick={onReconnect}
