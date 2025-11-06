@@ -21,6 +21,9 @@ export const toastService = {
     apiReconnectSuccess: () => toast.success("Reconnexion à l'API réussie !"),
     apiReconnectFailed: (message?: string) =>
         toast.error(message ? `La reconnexion a échoué : ${message}` : "La reconnexion a échoué."),
+    apiConfigTest: () => toast.loading("Vérification de l'adresse de l'API…"),
+    apiConfigSuccess: (url: string) => toast.success(`Adresse de l'API enregistrée : ${url}`),
+    apiConfigFailed: (message: string) => toast.error(`Impossible de contacter l'API : ${message}`),
 
     // EMPLOYEE
     employeeSyncFailed: (message: string) => toast.error(`Synchronisation des employés impossible : ${message}`),

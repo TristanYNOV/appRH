@@ -2,7 +2,7 @@ import { useRef, useState, type ChangeEvent } from "react";
 import { Toaster } from "react-hot-toast";
 
 import "./App.css";
-import { AuthForm, TopBar } from "./components/index.ts";
+import { ApiEndpointModal, AuthForm, TopBar } from "./components/index.ts";
 import authService from "./services/auth.service.ts";
 import { toastService } from "./services/toasts.service.ts";
 import { useAuthState } from "./hooks/useAuthState.ts";
@@ -10,6 +10,7 @@ import { useDashboardState } from "./hooks/useDashboardState.ts";
 import { useFeatureReminder } from "./hooks/useFeatureReminder.ts";
 import DashboardLayout from "./components/dashboard/DashboardLayout.tsx";
 import { extractErrorMessage } from "./utils/errorHandling.ts";
+import apiClient, { DEFAULT_API_BASE_URL } from "./HTTP/httpClient.ts";
 
 import type { LeaveRequest } from "./interfaces/leaveRequest.interface.ts";
 import type { Employee } from "./interfaces/employee.interface.ts";
@@ -22,6 +23,10 @@ function App() {
     const auth = useAuthState();
     const dashboard = useDashboardState(auth.isAuthenticated);
     const [isReconnectingApis, setIsReconnectingApis] = useState(false);
+    const [isApiSettingsOpen, setIsApiSettingsOpen] = useState(false);
+    const [isSavingApiSettings, setIsSavingApiSettings] = useState(false);
+    const [apiSettingsError, setApiSettingsError] = useState<string | null>(null);
+    const [apiBaseUrl, setApiBaseUrl] = useState(() => apiClient.getBaseURL());
     const missingFeatures = [
         !ATTENDANCE_API_AVAILABLE ? "présences" : null,
         !LEAVE_API_AVAILABLE ? "demandes d'absence" : null,
@@ -70,6 +75,16 @@ function App() {
         auth.closeAuth();
         dashboard.reset();
         featureReminder.reset();
+    };
+
+    const handleOpenApiSettings = () => {
+        setApiSettingsError(null);
+        setIsApiSettingsOpen(true);
+    };
+
+    const handleCloseApiSettings = () => {
+        setIsApiSettingsOpen(false);
+        setApiSettingsError(null);
     };
 
     const triggerEmployeeImport = () => {
@@ -147,6 +162,34 @@ function App() {
         }
     };
 
+    const handleSaveApiBaseUrl = async (url: string) => {
+        if (isSavingApiSettings) {
+            return;
+        }
+
+        setIsSavingApiSettings(true);
+        setApiSettingsError(null);
+        const toastId = toastService.apiConfigTest();
+        try {
+            const normalizedUrl = await apiClient.testConnection(url);
+            apiClient.setBaseURL(normalizedUrl);
+            setApiBaseUrl(normalizedUrl);
+            toastService.dismiss(toastId);
+            toastService.apiConfigSuccess(normalizedUrl);
+            setIsApiSettingsOpen(false);
+            if (auth.isAuthenticated) {
+                void dashboard.reconnectApis();
+            }
+        } catch (error) {
+            toastService.dismiss(toastId);
+            const message = extractErrorMessage(error);
+            setApiSettingsError(message);
+            toastService.apiConfigFailed(message);
+        } finally {
+            setIsSavingApiSettings(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-100">
             <TopBar
@@ -157,6 +200,17 @@ function App() {
                 canReconnect={auth.isAuthenticated}
                 isReconnecting={isReconnectingApis}
                 hasApiIssue={hasApiIssue}
+                onOpenApiSettings={handleOpenApiSettings}
+            />
+            <ApiEndpointModal
+                isOpen={isApiSettingsOpen}
+                currentUrl={apiBaseUrl}
+                defaultUrl={DEFAULT_API_BASE_URL}
+                error={apiSettingsError}
+                isSubmitting={isSavingApiSettings}
+                onClose={handleCloseApiSettings}
+                onSave={handleSaveApiBaseUrl}
+                onUrlChange={() => setApiSettingsError(null)}
             />
 
             {!auth.isAuthenticated && auth.authMode === null && (
