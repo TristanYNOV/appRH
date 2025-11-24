@@ -1,10 +1,11 @@
 import React from "react";
 import { FaTimes } from "react-icons/fa";
+import type { Attendance } from "../../../interfaces/attendance.codec.ts";
 import type { Employee } from "../../../interfaces/employee.codec.ts";
 
 type Props = {
     isOpen: boolean;
-    employee: Employee | undefined;
+    employee: (Employee & { attendances?: Attendance[] }) | undefined;
     onClose: () => void;
 };
 
@@ -17,7 +18,7 @@ const EmployeeAttendanceModal: React.FC<Props> = ({ isOpen, employee, onClose })
             <div className="relative z-10 w-full max-w-3xl rounded-2xl bg-white p-6 shadow-xl">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xl font-semibold">
-                        Présences — {employee.lastName} {employee.firstName}
+                        Présences — {employee.fullName}
                     </h3>
                     <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100" aria-label="Fermer">
                         <FaTimes />

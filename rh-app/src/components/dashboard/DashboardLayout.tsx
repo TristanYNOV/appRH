@@ -3,8 +3,16 @@ import type { ChangeEvent, RefObject } from "react";
 import DepartmentList from "../departments/DepartmentList.tsx";
 import EmployeeList from "../employees/EmployeeList.tsx";
 
-import type { Department } from "../../interfaces/department.codec.ts";
-import type { Employee } from "../../interfaces/employee.codec.ts";
+import type {
+    CreateDepartmentPayload,
+    Department,
+    UpdateDepartmentPayload,
+} from "../../interfaces/department.codec.ts";
+import type {
+    CreateEmployeePayload,
+    Employee,
+    UpdateEmployeePayload,
+} from "../../interfaces/employee.codec.ts";
 import type { LeaveRequest } from "../../interfaces/leaveRequest.codec.ts";
 
 type DisplayMode = "employee" | "department";
@@ -18,11 +26,11 @@ type Props = {
     isLoadingDepartments: boolean;
     isEmployeeApiAvailable: boolean;
     isDepartmentApiAvailable: boolean;
-    onCreateEmployee: (employee: Employee) => void;
-    onUpdateEmployee: (employee: Employee) => void;
+    onCreateEmployee: (employee: CreateEmployeePayload) => void;
+    onUpdateEmployee: (id: number, employee: UpdateEmployeePayload) => void;
     onDeleteEmployee: (id: number) => void;
-    onCreateDepartment: (department: Department) => void;
-    onUpdateDepartment: (department: Department) => void;
+    onCreateDepartment: (department: CreateDepartmentPayload) => void;
+    onUpdateDepartment: (id: number, department: UpdateDepartmentPayload) => void;
     onDeleteDepartment: (id: number) => void;
     onCreateLeaveRequest: (employeeId: number, leave: LeaveRequest) => void;
     onEmployeeImportClick: () => void;

@@ -1,10 +1,5 @@
 import { z } from "zod";
 
-import { AttendanceCodec } from "./attendance.codec.ts";
-import { BaseEntityCodec } from "./baseEntity.codec.ts";
-import { DepartmentCodec } from "./department.codec.ts";
-import { LeaveRequestCodec } from "./leaveRequest.codec.ts";
-
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 export enum eGender {
@@ -19,33 +14,50 @@ export const genderLabel: Record<eGender, string> = {
     [eGender.FEMALE]: "Femme",
 };
 
-const employeeCoreCodec = BaseEntityCodec.extend({
-    uniqueId: z.string(),
-    firstName: z.string().optional(),
-    lastName: z.string().optional(),
-    fullName: z.string().optional(),
+export const EmployeeAPICodec = z
+    .object({
+        id: z.number(),
+        uniqueId: z.string(),
+        fullName: z.string(),
+        gender: z.nativeEnum(eGender),
+        email: z.string().email(),
+        phoneNumber: z.string(),
+        address: z.string(),
+        position: z.string(),
+        salary: z.number(),
+        departmentName: z.string(),
+        hireDate: z.coerce.date(),
+    })
+    .strict();
+
+export const createEmployeeCodec = z.object({
+    firstName: z.string(),
+    lastName: z.string(),
     gender: z.nativeEnum(eGender),
     email: z.string().email(),
-    phone: z.string().optional(),
-    phoneNumber: z.string().optional(),
+    phoneNumber: z.string(),
     address: z.string(),
     position: z.string(),
     salary: z.number(),
+    departmentId: z.number(),
     hireDate: z.coerce.date(),
+});
+
+export const updateEmployeeCodec = z.object({
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    gender: z.nativeEnum(eGender).optional(),
+    email: z.string().email().optional(),
+    phoneNumber: z.string().optional(),
+    address: z.string().optional(),
+    position: z.string().optional(),
+    salary: z.number().optional(),
     departmentId: z.number().optional(),
-    departmentName: z.string().optional(),
+    hireDate: z.coerce.date().optional(),
 });
 
-const employeeRelationsCodec = z.object({
-    department: z.lazy(() => DepartmentCodec.omit({ employees: true })).optional(),
-    attendances: z.array(z.lazy(() => AttendanceCodec.omit({ employee: true }))).optional().default([]),
-    leaveRequests: z.array(z.lazy(() => LeaveRequestCodec.omit({ employee: true }))).optional().default([]),
-});
-
-export const EmployeeCodec = employeeCoreCodec.merge(employeeRelationsCodec).strict();
-
-export const EmployeePayloadCodec = EmployeeCodec.partial();
-
-export type Employee = z.infer<typeof EmployeeCodec>;
+export type Employee = z.infer<typeof EmployeeAPICodec>;
+export type CreateEmployeePayload = z.infer<typeof createEmployeeCodec>;
+export type UpdateEmployeePayload = z.infer<typeof updateEmployeeCodec>;
 
 export { EmployeeReferenceCodec } from "./employeeReference.codec.ts";

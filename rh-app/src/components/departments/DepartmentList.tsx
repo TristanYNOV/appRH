@@ -1,15 +1,16 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus, FaTrash, FaPen } from "react-icons/fa";
-import type { Department } from "../../interfaces/department.codec.ts";
-import type { Employee } from "../../interfaces/employee.codec.ts";
+import type {
+    CreateDepartmentPayload,
+    Department,
+    UpdateDepartmentPayload,
+} from "../../interfaces/department.codec.ts";
 import DepartmentFormModal, { type DepartmentFormValues } from "./modals/DepartmentFormModal.tsx";
-
-const emptyEmployees: Employee[] = [];
 
 type Props = {
     departments: Department[];
-    onCreate?: (dept: Department) => void;
-    onUpdate?: (dept: Department) => void;
+    onCreate?: (dept: CreateDepartmentPayload) => void;
+    onUpdate?: (id: number, dept: UpdateDepartmentPayload) => void;
     onDelete?: (id: number) => void;
     isLoading?: boolean;
     actionsDisabled?: boolean;
@@ -35,11 +36,6 @@ const DepartmentList: React.FC<Props> = ({
         }
     }, [actionsDisabled]);
 
-    const nextId = useMemo(() => {
-        const max = departments.reduce((m, d) => Math.max(m, d.id), 0);
-        return max + 1;
-    }, [departments]);
-
     const selectedDepartment = useMemo(() => {
         if (!modal || modal.mode !== "update") return undefined;
         return departments.find((department) => department.id === modal.departmentId);
@@ -60,34 +56,24 @@ const DepartmentList: React.FC<Props> = ({
     };
 
     const handleSubmit = (values: DepartmentFormValues) => {
-        const now = new Date();
         if (!modal || modal.mode === "create") {
-            const newDept: Department = {
-                id: nextId,
+            const payload: CreateDepartmentPayload = {
                 name: values.name.trim(),
                 code: values.code.trim(),
                 description: values.description.trim(),
-                employees: emptyEmployees,
-                createdAt: now,
-                updatedAt: now,
-                createdBy: "system",
-                updatedBy: "system",
             };
 
-            if (onCreate) onCreate(newDept);
-            else console.log("Create department:", newDept);
+            if (onCreate) onCreate(payload);
+            else console.log("Create department payload:", payload);
         } else if (modal.mode === "update" && selectedDepartment) {
-            const updatedDept: Department = {
-                ...selectedDepartment,
+            const payload: UpdateDepartmentPayload = {
                 name: values.name.trim(),
                 code: values.code.trim(),
                 description: values.description.trim(),
-                updatedAt: now,
-                updatedBy: "system",
             };
 
-            if (onUpdate) onUpdate(updatedDept);
-            else console.log("Update department:", updatedDept);
+            if (onUpdate) onUpdate(selectedDepartment.id, payload);
+            else console.log("Update department payload:", selectedDepartment.id, payload);
         }
 
         setModal(undefined);
@@ -120,20 +106,19 @@ const DepartmentList: React.FC<Props> = ({
                             <th className="px-4 py-3">Nom</th>
                             <th className="px-4 py-3">Code</th>
                             <th className="px-4 py-3">Description</th>
-                            <th className="px-4 py-3"># Employés</th>
                             <th className="px-4 py-3 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {isLoading ? (
                             <tr>
-                                <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
+                                <td colSpan={5} className="px-4 py-6 text-center text-gray-500">
                                     Chargement des départements…
                                 </td>
                             </tr>
                         ) : departments.length === 0 ? (
                             <tr>
-                                <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
+                                <td colSpan={5} className="px-4 py-6 text-center text-gray-500">
                                     Aucun département pour le moment.
                                 </td>
                             </tr>
@@ -144,7 +129,6 @@ const DepartmentList: React.FC<Props> = ({
                                     <td className="px-4 py-3 font-medium">{dept.name}</td>
                                     <td className="px-4 py-3">{dept.code}</td>
                                     <td className="px-4 py-3">{dept.description}</td>
-                                    <td className="px-4 py-3">{dept.employees?.length ?? 0}</td>
                                     <td className="px-4 py-3">
                                         <div className="flex justify-end gap-2">
                                             <button

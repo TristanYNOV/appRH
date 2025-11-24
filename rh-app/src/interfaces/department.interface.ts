@@ -1,1 +1,8 @@
-export { DepartmentCodec, DepartmentPayloadCodec, type Department } from "./department.codec.ts";
+export {
+    DepartmentAPICodec,
+    createDepartmentCodec,
+    updateDepartmentCodec,
+    type Department,
+    type CreateDepartmentPayload,
+    type UpdateDepartmentPayload,
+} from "./department.codec.ts";
