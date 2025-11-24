@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 
 import { FileAPI } from "../HTTP/file.api.ts";
+import apiClient from "../HTTP/httpClient.ts";
 import { useApiAvailability } from "./useApiAvailability.ts";
 import { extractErrorMessage } from "../utils/errorHandling.ts";
 import { downloadBlob } from "../utils/download.ts";
@@ -51,9 +52,9 @@ export const useFileTransfers = ({
         [onAvailabilityChange, updateAvailability]
     );
 
-    const checkAvailability = useCallback(async () => {
+    const updateAvailabilityFromHealth = useCallback(async () => {
         try {
-            await FileAPI.checkAvailability();
+            await apiClient.checkHealth();
             syncAvailability(true);
             return true;
         } catch (error) {
@@ -62,6 +63,10 @@ export const useFileTransfers = ({
             return false;
         }
     }, [syncAvailability]);
+
+    const checkAvailability = useCallback(async () => {
+        return updateAvailabilityFromHealth();
+    }, [updateAvailabilityFromHealth]);
 
     const importEmployees = useCallback(
         async (file: File) => {
@@ -77,12 +82,12 @@ export const useFileTransfers = ({
             } catch (error) {
                 toastService.dismiss(toastId);
                 toastService.fileImportFailed("employés", extractErrorMessage(error));
-                syncAvailability(false);
+                void updateAvailabilityFromHealth();
             } finally {
                 setIsImportingEmployees(false);
             }
         },
-        [onEmployeesUpdated, syncAvailability]
+        [onEmployeesUpdated, syncAvailability, updateAvailabilityFromHealth]
     );
 
     const importDepartments = useCallback(
@@ -99,12 +104,12 @@ export const useFileTransfers = ({
             } catch (error) {
                 toastService.dismiss(toastId);
                 toastService.fileImportFailed("départements", extractErrorMessage(error));
-                syncAvailability(false);
+                void updateAvailabilityFromHealth();
             } finally {
                 setIsImportingDepartments(false);
             }
         },
-        [onDepartmentsUpdated, syncAvailability]
+        [onDepartmentsUpdated, syncAvailability, updateAvailabilityFromHealth]
     );
 
     const exportEmployees = useCallback(async () => {
@@ -119,11 +124,11 @@ export const useFileTransfers = ({
         } catch (error) {
             toastService.dismiss(toastId);
             toastService.fileExportFailed("employés", extractErrorMessage(error));
-            syncAvailability(false);
+            void updateAvailabilityFromHealth();
         } finally {
             setIsExportingEmployees(false);
         }
-    }, [syncAvailability]);
+    }, [syncAvailability, updateAvailabilityFromHealth]);
 
     const exportDepartments = useCallback(async () => {
         setIsExportingDepartments(true);
@@ -137,11 +142,11 @@ export const useFileTransfers = ({
         } catch (error) {
             toastService.dismiss(toastId);
             toastService.fileExportFailed("départements", extractErrorMessage(error));
-            syncAvailability(false);
+            void updateAvailabilityFromHealth();
         } finally {
             setIsExportingDepartments(false);
         }
-    }, [syncAvailability]);
+    }, [syncAvailability, updateAvailabilityFromHealth]);
 
     return {
         isAvailable,

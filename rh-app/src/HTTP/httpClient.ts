@@ -119,20 +119,16 @@ class HTTPClient {
         return this.baseURL;
     }
 
-    public async testConnection(baseURL: string): Promise<string> {
-        const normalizedUrl = normalizeApiBaseUrl(baseURL);
-
+    private async pingHealth(baseURL: string) {
         try {
-            const response = await axios.get(normalizedUrl, {
+            const response = await axios.get(`${baseURL}/health`, {
                 timeout: 5000,
                 validateStatus: () => true,
             });
 
-            if (response.status >= 500) {
+            if (response.status >= 400) {
                 throw new Error(`Le serveur a répondu avec le statut ${response.status}.`);
             }
-
-            return normalizedUrl;
         } catch (error) {
             const axiosError = error as AxiosError;
             if (axiosError.code === "ECONNABORTED") {
@@ -140,6 +136,19 @@ class HTTPClient {
             }
             throw error;
         }
+    }
+
+    public async checkHealth(baseURL?: string): Promise<void> {
+        const normalizedUrl = normalizeApiBaseUrl(baseURL ?? this.baseURL);
+        await this.pingHealth(normalizedUrl);
+    }
+
+    public async testConnection(baseURL: string): Promise<string> {
+        const normalizedUrl = normalizeApiBaseUrl(baseURL);
+
+        await this.pingHealth(normalizedUrl);
+
+        return normalizedUrl;
     }
 
     public async get<T = unknown>(

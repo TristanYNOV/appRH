@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { DepartmentAPI } from "../HTTP/department.api.ts";
+import apiClient from "../HTTP/httpClient.ts";
 import type {
     CreateDepartmentPayload,
     Department,
@@ -45,21 +46,29 @@ export const useDepartments = ({ enabled, onAvailabilityChange }: Options) => {
         [onAvailabilityChange, updateAvailability]
     );
 
+    const updateAvailabilityFromHealth = useCallback(async () => {
+        try {
+            await apiClient.checkHealth();
+            syncAvailability(true);
+            return true;
+        } catch {
+            syncAvailability(false);
+            return false;
+        }
+    }, [syncAvailability]);
+
     const checkAvailability = useCallback(async () => {
         setIsLoading(true);
         try {
-            const data = await DepartmentAPI.getAll();
-            setDepartments(data.map(normalizeDepartment));
-            syncAvailability(true);
-            return true;
-        } catch (error) {
-            toastService.departmentSyncFailed(extractErrorMessage(error));
-            syncAvailability(false);
-            return false;
+            const healthy = await updateAvailabilityFromHealth();
+            if (healthy) {
+                bumpRefresh();
+            }
+            return healthy;
         } finally {
             setIsLoading(false);
         }
-    }, [syncAvailability]);
+    }, [bumpRefresh, updateAvailabilityFromHealth]);
 
     useEffect(() => {
         if (!enabled) {
@@ -73,6 +82,11 @@ export const useDepartments = ({ enabled, onAvailabilityChange }: Options) => {
         const load = async () => {
             setIsLoading(true);
             try {
+                const healthy = await updateAvailabilityFromHealth();
+                if (!healthy) {
+                    return;
+                }
+
                 const data = await DepartmentAPI.getAll();
                 if (cancelled) return;
                 setDepartments(data.map(normalizeDepartment));
@@ -80,7 +94,7 @@ export const useDepartments = ({ enabled, onAvailabilityChange }: Options) => {
             } catch (error) {
                 if (cancelled) return;
                 toastService.departmentSyncFailed(extractErrorMessage(error));
-                syncAvailability(false);
+                void updateAvailabilityFromHealth();
             } finally {
                 if (!cancelled) {
                     setIsLoading(false);
@@ -93,7 +107,7 @@ export const useDepartments = ({ enabled, onAvailabilityChange }: Options) => {
         return () => {
             cancelled = true;
         };
-    }, [enabled, refreshKey, resetAvailability, syncAvailability]);
+    }, [enabled, refreshKey, resetAvailability, syncAvailability, updateAvailabilityFromHealth]);
 
     const createDepartment = useCallback(
         async (department: CreateDepartmentPayload) => {
@@ -107,10 +121,10 @@ export const useDepartments = ({ enabled, onAvailabilityChange }: Options) => {
             } catch (error) {
                 toastService.dismiss(toastId);
                 toastService.departmentCreationFailed(extractErrorMessage(error));
-                syncAvailability(false);
+                void updateAvailabilityFromHealth();
             }
         },
-        [bumpRefresh, syncAvailability]
+        [bumpRefresh, syncAvailability, updateAvailabilityFromHealth]
     );
 
     const updateDepartment = useCallback(
@@ -125,10 +139,10 @@ export const useDepartments = ({ enabled, onAvailabilityChange }: Options) => {
             } catch (error) {
                 toastService.dismiss(toastId);
                 toastService.departmentUpdateFailed(extractErrorMessage(error));
-                syncAvailability(false);
+                void updateAvailabilityFromHealth();
             }
         },
-        [bumpRefresh, syncAvailability]
+        [bumpRefresh, syncAvailability, updateAvailabilityFromHealth]
     );
 
     const deleteDepartment = useCallback(
@@ -146,10 +160,10 @@ export const useDepartments = ({ enabled, onAvailabilityChange }: Options) => {
             } catch (error) {
                 toastService.dismiss(toastId);
                 toastService.departmentDeletionFailed(extractErrorMessage(error));
-                syncAvailability(false);
+                void updateAvailabilityFromHealth();
             }
         },
-        [departments, bumpRefresh, syncAvailability]
+        [departments, bumpRefresh, syncAvailability, updateAvailabilityFromHealth]
     );
 
     return {
