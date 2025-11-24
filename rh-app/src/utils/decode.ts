@@ -17,9 +17,17 @@ const formatValue = (value: unknown) => {
 };
 
 export const decode = <T>(schema: ZodTypeAny, data: unknown, context: string): T => {
-    if (Array.isArray(data) && data.length === 0) {
-        console.info(`[DECODE][${context}] Tableau vide reçu, aucune validation nécessaire.`);
-        return [] as unknown as T;
+    if (Array.isArray(data)) {
+        const meaningfulItems = data.filter((item) => {
+            if (item == null) return false;
+            if (typeof item !== "object") return true;
+            return Object.keys(item as Record<string, unknown>).length > 0;
+        });
+
+        if (meaningfulItems.length === 0) {
+            console.info(`[DECODE][${context}] Tableau vide reçu (ou sans données pertinentes), aucune validation nécessaire.`);
+            return [] as unknown as T;
+        }
     }
 
     const result = schema.safeParse(data);
