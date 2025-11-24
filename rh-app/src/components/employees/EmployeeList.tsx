@@ -118,9 +118,10 @@ const EmployeeList: React.FC<Props> = ({
             position: employeeFormEmployee.position ?? "",
             salary: employeeFormEmployee.salary ? String(employeeFormEmployee.salary) : "",
             hireDate,
-            departmentName: employeeFormEmployee.departmentName ?? "",
+            departmentId:
+                departments?.find((d) => d.name === employeeFormEmployee.departmentName)?.id.toString() ?? "",
         };
-    }, [employeeFormEmployee]);
+    }, [departments, employeeFormEmployee]);
 
     const handleDelete = (id: number) => {
         if (onDelete) onDelete(id);
@@ -129,7 +130,11 @@ const EmployeeList: React.FC<Props> = ({
 
     const handleEmployeeSubmit = (values: EmployeeFormValues) => {
         const now = new Date();
-        const departmentName = values.departmentName.trim();
+        const departmentId = Number(values.departmentId);
+        if (!departmentId) {
+            alert("Veuillez sélectionner un département.");
+            return;
+        }
 
         if (employeeForm?.mode === "create") {
             const payload: CreateEmployeePayload = {
@@ -141,7 +146,7 @@ const EmployeeList: React.FC<Props> = ({
                 address: values.address.trim(),
                 position: values.position.trim(),
                 salary: Number(values.salary || 0),
-                departmentName,
+                departmentId,
                 hireDate: values.hireDate ? new Date(values.hireDate) : now,
             };
 
@@ -158,7 +163,7 @@ const EmployeeList: React.FC<Props> = ({
                 position: values.position.trim(),
                 salary: values.salary ? Number(values.salary) : undefined,
                 hireDate: values.hireDate ? new Date(values.hireDate) : undefined,
-                departmentName,
+                departmentId,
             };
 
             if (onUpdate) onUpdate(employeeFormEmployee.id, payload);

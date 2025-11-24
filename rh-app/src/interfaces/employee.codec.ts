@@ -39,7 +39,7 @@ export const createEmployeeCodec = z.object({
     address: z.string(),
     position: z.string(),
     salary: z.number(),
-    departmentName: z.string(),
+    departmentId: z.number(),
     hireDate: z.coerce.date(),
 });
 
@@ -52,7 +52,7 @@ export const updateEmployeeCodec = z.object({
     address: z.string().optional(),
     position: z.string().optional(),
     salary: z.number().optional(),
-    departmentName: z.string(),
+    departmentId: z.number().optional(),
     hireDate: z.coerce.date().optional(),
 });
 

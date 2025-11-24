@@ -13,7 +13,7 @@ export type EmployeeFormValues = {
     position: string;
     salary: string;
     hireDate: string;
-    departmentName: string;
+    departmentId: string;
 };
 
 const createEmptyEmployeeForm = (): EmployeeFormValues => ({
@@ -26,7 +26,7 @@ const createEmptyEmployeeForm = (): EmployeeFormValues => ({
     position: "",
     salary: "",
     hireDate: "",
-    departmentName: "",
+    departmentId: "",
 });
 
 type Props = {
@@ -191,14 +191,14 @@ const EmployeeFormModal: React.FC<Props> = ({
                     <div>
                         <label className="block text-sm mb-1">Département</label>
                         <select
-                            value={form.departmentName}
-                            onChange={(e) => setForm((f) => ({ ...f, departmentName: e.target.value }))}
+                            value={form.departmentId}
+                            onChange={(e) => setForm((f) => ({ ...f, departmentId: e.target.value }))}
                             required
                             className="w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="">— Choisir —</option>
                             {departments?.map((d) => (
-                                <option key={d.id} value={d.name}>
+                                <option key={d.id} value={d.id}>
                                     {d.name} ({d.code})
                                 </option>
                             ))}
