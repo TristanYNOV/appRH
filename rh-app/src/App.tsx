@@ -12,9 +12,9 @@ import DashboardLayout from "./components/dashboard/DashboardLayout.tsx";
 import { extractErrorMessage } from "./utils/errorHandling.ts";
 import apiClient, { DEFAULT_API_BASE_URL } from "./HTTP/httpClient.ts";
 
-import type { LeaveRequest } from "./interfaces/leaveRequest.interface.ts";
-import type { Employee } from "./interfaces/employee.interface.ts";
-import type { Department } from "./interfaces/department.interface.ts";
+import type { Department } from "./interfaces/department.codec.ts";
+import type { Employee } from "./interfaces/employee.codec.ts";
+import type { LeaveRequest } from "./interfaces/leaveRequest.codec.ts";
 
 const ATTENDANCE_API_AVAILABLE = false;
 const LEAVE_API_AVAILABLE = false;

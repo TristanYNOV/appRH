@@ -1,23 +1,30 @@
-import type {Department} from "../interfaces/department.interface.ts";
 import apiClient from "./httpClient.ts";
+import { DepartmentCodec, DepartmentPayloadCodec, type Department } from "../interfaces/department.codec.ts";
+import { decode } from "../utils/decode.ts";
 
 export const baseURLDepartment = "department";
 
 export const DepartmentAPI = {
     async getAll(): Promise<Department[]> {
-        return apiClient.get<Department[]>(`/${baseURLDepartment}`);
+        const data = await apiClient.get<unknown>(`/${baseURLDepartment}`);
+        return decode(DepartmentCodec.array(), data, "DepartmentAPI.getAll");
     },
 
     async getById(id: number): Promise<Department> {
-        return apiClient.get<Department>(`/${baseURLDepartment}/${id}`);
+        const data = await apiClient.get<unknown>(`/${baseURLDepartment}/${id}`);
+        return decode(DepartmentCodec, data, "DepartmentAPI.getById");
     },
 
     async create(department: Partial<Department>): Promise<Department> {
-        return apiClient.post<Department>(`/${baseURLDepartment}`, department);
+        const payload = decode(DepartmentPayloadCodec, department, "DepartmentAPI.create.payload");
+        const created = await apiClient.post<unknown>(`/${baseURLDepartment}`, payload);
+        return decode(DepartmentCodec, created, "DepartmentAPI.create.response");
     },
 
     async update(department: Partial<Department>): Promise<Department> {
-        return apiClient.put(`/${baseURLDepartment}/${department.id}`, department);
+        const payload = decode(DepartmentPayloadCodec, department, "DepartmentAPI.update.payload");
+        const updated = await apiClient.put<unknown>(`/${baseURLDepartment}/${department.id}`, payload);
+        return decode(DepartmentCodec, updated, "DepartmentAPI.update.response");
     },
 
     async remove(id: number): Promise<void> {

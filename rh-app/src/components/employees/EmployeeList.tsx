@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus, FaTrash, FaCalendarCheck, FaUmbrellaBeach, FaPen } from "react-icons/fa";
-import { eGender, type Employee, genderLabel } from "../../interfaces/employee.interface.ts";
-import type { Department } from "../../interfaces/department.interface.ts";
-import type { LeaveRequest } from "../../interfaces/leaveRequest.interface.ts";
-import type { Attendance } from "../../interfaces/attendance.interface.ts";
+import { eGender, type Employee, genderLabel } from "../../interfaces/employee.codec.ts";
+import type { Attendance } from "../../interfaces/attendance.codec.ts";
+import type { Department } from "../../interfaces/department.codec.ts";
+import type { LeaveRequest } from "../../interfaces/leaveRequest.codec.ts";
 import EmployeeFormModal, { type EmployeeFormValues } from "./modals/EmployeeFormModal.tsx";
 import EmployeeAttendanceModal from "./modals/EmployeeAttendanceModal.tsx";
 import EmployeeLeaveModal from "./modals/EmployeeLeaveModal.tsx";

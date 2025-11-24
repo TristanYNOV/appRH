@@ -3,9 +3,9 @@ import type { ChangeEvent, RefObject } from "react";
 import DepartmentList from "../departments/DepartmentList.tsx";
 import EmployeeList from "../employees/EmployeeList.tsx";
 
-import type { Department } from "../../interfaces/department.interface.ts";
-import type { Employee } from "../../interfaces/employee.interface.ts";
-import type { LeaveRequest } from "../../interfaces/leaveRequest.interface.ts";
+import type { Department } from "../../interfaces/department.codec.ts";
+import type { Employee } from "../../interfaces/employee.codec.ts";
+import type { LeaveRequest } from "../../interfaces/leaveRequest.codec.ts";
 
 type DisplayMode = "employee" | "department";
 

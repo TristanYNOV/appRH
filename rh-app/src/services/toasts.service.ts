@@ -1,7 +1,7 @@
 import toast from "react-hot-toast";
-import type {Employee} from "../interfaces/employee.interface.ts";
-import type {Department} from "../interfaces/department.interface.ts";
-import type {LeaveRequest} from "../interfaces/leaveRequest.interface.ts";
+import type { Department } from "../interfaces/department.codec.ts";
+import type { Employee } from "../interfaces/employee.codec.ts";
+import type { LeaveRequest } from "../interfaces/leaveRequest.codec.ts";
 
 const formatPerson = (employee: Employee) => `${employee.lastName} ${employee.firstName}`.trim();
 

@@ -1,6 +1,6 @@
-import type { Department } from "../interfaces/department.interface.ts";
-import type { Employee } from "../interfaces/employee.interface.ts";
-import type { LeaveRequest } from "../interfaces/leaveRequest.interface.ts";
+import type { Department } from "../interfaces/department.codec.ts";
+import type { Employee } from "../interfaces/employee.codec.ts";
+import type { LeaveRequest } from "../interfaces/leaveRequest.codec.ts";
 
 const parseDate = (value: unknown): Date => {
     if (value instanceof Date) return value;

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FaTimes } from "react-icons/fa";
-import type { Employee } from "../../../interfaces/employee.interface.ts";
+import type { Employee } from "../../../interfaces/employee.codec.ts";
 import {
     LeaveStatus,
     LeaveType,
@@ -8,7 +8,7 @@ import {
     leaveTypeOptions,
     leaveTypeRecord,
     type LeaveRequest,
-} from "../../../interfaces/leaveRequest.interface.ts";
+} from "../../../interfaces/leaveRequest.codec.ts";
 
 type LeaveFormValues = {
     leaveType: LeaveType;

@@ -1,10 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus, FaTrash, FaPen } from "react-icons/fa";
-import type { Department } from "../../interfaces/department.interface.ts";
-import type { Employee } from "../../interfaces/employee.interface.ts";
-import DepartmentFormModal, {
-    type DepartmentFormValues,
-} from "./modals/DepartmentFormModal.tsx";
+import type { Department } from "../../interfaces/department.codec.ts";
+import type { Employee } from "../../interfaces/employee.codec.ts";
+import DepartmentFormModal, { type DepartmentFormValues } from "./modals/DepartmentFormModal.tsx";
 
 const emptyEmployees: Employee[] = [];
 
