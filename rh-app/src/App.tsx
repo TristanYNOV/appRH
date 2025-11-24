@@ -1,74 +1,108 @@
-import { useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { Toaster } from "react-hot-toast";
 
 import "./App.css";
 import { ApiEndpointModal, AuthForm, TopBar } from "./components/index.ts";
 import authService from "./services/auth.service.ts";
 import { toastService } from "./services/toasts.service.ts";
-import { useAuthState } from "./hooks/useAuthState.ts";
-import { useDashboardState } from "./hooks/useDashboardState.ts";
 import { useFeatureReminder } from "./hooks/useFeatureReminder.ts";
 import DashboardLayout from "./components/dashboard/DashboardLayout.tsx";
 import { extractErrorMessage } from "./utils/errorHandling.ts";
 import apiClient, { DEFAULT_API_BASE_URL } from "./HTTP/httpClient.ts";
+import { useAppStore } from "./store/useAppStore.ts";
 
 import type {
     CreateDepartmentPayload,
-    Department,
     UpdateDepartmentPayload,
 } from "./interfaces/department.codec.ts";
-import type {
-    CreateEmployeePayload,
-    Employee,
-    UpdateEmployeePayload,
-} from "./interfaces/employee.codec.ts";
+import type { CreateEmployeePayload, UpdateEmployeePayload } from "./interfaces/employee.codec.ts";
 import type { LeaveRequest } from "./interfaces/leaveRequest.codec.ts";
 
 const ATTENDANCE_API_AVAILABLE = false;
 const LEAVE_API_AVAILABLE = false;
 
 function App() {
-    const auth = useAuthState();
-    const dashboard = useDashboardState(auth.isAuthenticated);
+    const {
+        isAuthenticated,
+        authMode,
+        openAuth,
+        closeAuth,
+        login,
+        logout,
+        displayMode,
+        setDisplayMode,
+        employees,
+        isLoadingEmployees,
+        isEmployeeApiAvailable,
+        createEmployee,
+        updateEmployee,
+        deleteEmployee,
+        departments,
+        isLoadingDepartments,
+        isDepartmentApiAvailable,
+        createDepartment,
+        updateDepartment,
+        deleteDepartment,
+        isFileApiAvailable,
+        isImportingEmployees,
+        isImportingDepartments,
+        isExportingEmployees,
+        isExportingDepartments,
+        importEmployees,
+        importDepartments,
+        exportEmployees,
+        exportDepartments,
+        loadEmployees,
+        loadDepartments,
+        checkFileAvailability,
+        resetAfterLogout,
+        reconnectApis,
+        apiBaseUrl,
+        setApiBaseUrl,
+    } = useAppStore();
+
     const [isReconnectingApis, setIsReconnectingApis] = useState(false);
     const [isApiSettingsOpen, setIsApiSettingsOpen] = useState(false);
     const [isSavingApiSettings, setIsSavingApiSettings] = useState(false);
     const [apiSettingsError, setApiSettingsError] = useState<string | null>(null);
-    const [apiBaseUrl, setApiBaseUrl] = useState(() => apiClient.getBaseURL());
     const missingFeatures = [
         !ATTENDANCE_API_AVAILABLE ? "présences" : null,
         !LEAVE_API_AVAILABLE ? "demandes d'absence" : null,
     ].filter((feature): feature is string => feature !== null);
-    const featureReminder = useFeatureReminder(auth.isAuthenticated, missingFeatures);
+    const featureReminder = useFeatureReminder(isAuthenticated, missingFeatures);
 
     const employeeFileInputRef = useRef<HTMLInputElement | null>(null);
     const departmentFileInputRef = useRef<HTMLInputElement | null>(null);
 
-    const disableEmployeeImport =
-        !dashboard.isFileApiAvailable || dashboard.isImportingEmployees;
-    const disableDepartmentImport =
-        !dashboard.isFileApiAvailable || dashboard.isImportingDepartments;
-    const disableEmployeeExport =
-        !dashboard.isFileApiAvailable || dashboard.isExportingEmployees;
-    const disableDepartmentExport =
-        !dashboard.isFileApiAvailable || dashboard.isExportingDepartments;
+    const disableEmployeeImport = !isFileApiAvailable || isImportingEmployees;
+    const disableDepartmentImport = !isFileApiAvailable || isImportingDepartments;
+    const disableEmployeeExport = !isFileApiAvailable || isExportingEmployees;
+    const disableDepartmentExport = !isFileApiAvailable || isExportingDepartments;
     const disableAttendanceActions =
-        !ATTENDANCE_API_AVAILABLE || !dashboard.isEmployeeApiAvailable;
-    const disableLeaveActions =
-        !LEAVE_API_AVAILABLE || !dashboard.isEmployeeApiAvailable;
+        !ATTENDANCE_API_AVAILABLE || !isEmployeeApiAvailable;
+    const disableLeaveActions = !ATTENDANCE_API_AVAILABLE || !isEmployeeApiAvailable;
 
     const hasApiIssue =
-        !dashboard.isEmployeeApiAvailable ||
-        !dashboard.isDepartmentApiAvailable ||
-        !dashboard.isFileApiAvailable;
+        !isEmployeeApiAvailable || !isDepartmentApiAvailable || !isFileApiAvailable;
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            resetAfterLogout();
+            return;
+        }
+
+        void loadEmployees();
+        void loadDepartments();
+        void checkFileAvailability();
+    }, [checkFileAvailability, isAuthenticated, loadDepartments, loadEmployees, resetAfterLogout]);
 
     const handleAuth = async (email: string, password: string, mode: "login" | "signup") => {
         const toastId = toastService.authAttempt();
         try {
             const mockToken = window.btoa(`${email}:${password}:${mode}:${Date.now()}`);
             authService.storeToken(mockToken);
-            auth.login();
-            auth.closeAuth();
+            login();
+            closeAuth();
             toastService.dismiss(toastId);
             toastService.authSuccess();
         } catch (error) {
@@ -79,9 +113,9 @@ function App() {
 
     const handleLogout = () => {
         authService.clearToken();
-        auth.logout();
-        auth.closeAuth();
-        dashboard.reset();
+        logout();
+        closeAuth();
+        resetAfterLogout();
         featureReminder.reset();
     };
 
@@ -109,38 +143,38 @@ function App() {
         const file = event.target.files?.[0];
         event.target.value = "";
         if (!file) return;
-        await dashboard.importEmployees(file);
+        await importEmployees(file);
     };
 
     const onImportDepartments = async (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         event.target.value = "";
         if (!file) return;
-        await dashboard.importDepartments(file);
+        await importDepartments(file);
     };
 
     const handleCreateEmployee = async (employee: CreateEmployeePayload) => {
-        await dashboard.createEmployee(employee);
+        await createEmployee(employee);
     };
 
     const handleUpdateEmployee = async (id: number, employee: UpdateEmployeePayload) => {
-        await dashboard.updateEmployee(id, employee);
+        await updateEmployee(id, employee);
     };
 
     const handleDeleteEmployee = async (id: number) => {
-        await dashboard.deleteEmployee(id);
+        await deleteEmployee(id);
     };
 
     const handleCreateDepartment = async (department: CreateDepartmentPayload) => {
-        await dashboard.createDepartment(department);
+        await createDepartment(department);
     };
 
     const handleUpdateDepartment = async (id: number, department: UpdateDepartmentPayload) => {
-        await dashboard.updateDepartment(id, department);
+        await updateDepartment(id, department);
     };
 
     const handleDeleteDepartment = async (id: number) => {
-        await dashboard.deleteDepartment(id);
+        await deleteDepartment(id);
     };
 
     const handleCreateLeaveRequest = (_employeeId: number, _leave: LeaveRequest) => {
@@ -148,14 +182,14 @@ function App() {
     };
 
     const handleReconnectApis = async () => {
-        if (!auth.isAuthenticated || isReconnectingApis) {
+        if (!isAuthenticated || isReconnectingApis) {
             return;
         }
 
         setIsReconnectingApis(true);
         const toastId = toastService.apiReconnectAttempt();
         try {
-            const success = await dashboard.reconnectApis();
+            const success = await reconnectApis();
             toastService.dismiss(toastId);
             if (success) {
                 toastService.apiReconnectSuccess();
@@ -185,8 +219,8 @@ function App() {
             toastService.dismiss(toastId);
             toastService.apiConfigSuccess(normalizedUrl);
             setIsApiSettingsOpen(false);
-            if (auth.isAuthenticated) {
-                void dashboard.reconnectApis();
+            if (isAuthenticated) {
+                void reconnectApis();
             }
         } catch (error) {
             toastService.dismiss(toastId);
@@ -201,11 +235,11 @@ function App() {
     return (
         <div className="min-h-screen bg-gray-100">
             <TopBar
-                logIn={auth.isAuthenticated}
-                onOpenAuth={auth.openAuth}
+                logIn={isAuthenticated}
+                onOpenAuth={openAuth}
                 onLogout={handleLogout}
                 onReconnect={handleReconnectApis}
-                canReconnect={auth.isAuthenticated}
+                canReconnect={isAuthenticated}
                 isReconnecting={isReconnectingApis}
                 hasApiIssue={hasApiIssue}
                 onOpenApiSettings={handleOpenApiSettings}
@@ -221,7 +255,7 @@ function App() {
                 onUrlChange={() => setApiSettingsError(null)}
             />
 
-            {!auth.isAuthenticated && auth.authMode === null && (
+            {!isAuthenticated && authMode === null && (
                 <div className="flex flex-col justify-center w-full h-80 items-center">
                     <span className="text-center">Merci de vous authentifier !</span>
                     <div className="flex gap-4 mt-8">
@@ -235,18 +269,18 @@ function App() {
                 </div>
             )}
 
-            {!auth.isAuthenticated && auth.authMode && <AuthForm onSubmit={handleAuth} />}
+            {!isAuthenticated && authMode && <AuthForm onSubmit={handleAuth} />}
 
-            {auth.isAuthenticated && (
+            {isAuthenticated && (
                 <DashboardLayout
-                    displayMode={dashboard.displayMode}
-                    onDisplayModeChange={(mode) => dashboard.setDisplayMode(mode)}
-                    employees={dashboard.employees}
-                    departments={dashboard.departments}
-                    isLoadingEmployees={dashboard.isLoadingEmployees}
-                    isLoadingDepartments={dashboard.isLoadingDepartments}
-                    isEmployeeApiAvailable={dashboard.isEmployeeApiAvailable}
-                    isDepartmentApiAvailable={dashboard.isDepartmentApiAvailable}
+                    displayMode={displayMode}
+                    onDisplayModeChange={(mode) => setDisplayMode(mode)}
+                    employees={employees}
+                    departments={departments}
+                    isLoadingEmployees={isLoadingEmployees}
+                    isLoadingDepartments={isLoadingDepartments}
+                    isEmployeeApiAvailable={isEmployeeApiAvailable}
+                    isDepartmentApiAvailable={isDepartmentApiAvailable}
                     onCreateEmployee={handleCreateEmployee}
                     onUpdateEmployee={handleUpdateEmployee}
                     onDeleteEmployee={handleDeleteEmployee}
@@ -256,8 +290,8 @@ function App() {
                     onCreateLeaveRequest={handleCreateLeaveRequest}
                     onEmployeeImportClick={triggerEmployeeImport}
                     onDepartmentImportClick={triggerDepartmentImport}
-                    onExportEmployees={dashboard.exportEmployees}
-                    onExportDepartments={dashboard.exportDepartments}
+                    onExportEmployees={exportEmployees}
+                    onExportDepartments={exportDepartments}
                     onEmployeeFileChange={onImportEmployees}
                     onDepartmentFileChange={onImportDepartments}
                     employeeFileInputRef={employeeFileInputRef}
