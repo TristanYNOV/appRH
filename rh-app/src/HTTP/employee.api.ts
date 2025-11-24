@@ -4,7 +4,7 @@
 import type {Employee} from "../interfaces/employee.interface.ts";
 import apiClient from "./httpClient.ts";
 
-export const baseURLEmployee = "employee";
+export const baseURLEmployee = "employees";
 
 export const EmployeeAPI = {
     async getAll(): Promise<Employee[]> {

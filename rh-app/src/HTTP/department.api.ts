@@ -1,7 +1,7 @@
 import type {Department} from "../interfaces/department.interface.ts";
 import apiClient from "./httpClient.ts";
 
-export const baseURLDepartment = "department";
+export const baseURLDepartment = "departments";
 
 export const DepartmentAPI = {
     async getAll(): Promise<Department[]> {
