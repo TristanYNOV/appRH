@@ -34,7 +34,7 @@ export const normalizeEmployee = (employee: Employee): Employee => ({
           }
         : undefined,
     attendances: Array.isArray(employee.attendances)
-        ? employee.attendances.map((attendance) => ({
+        ? employee.attendances.map((attendance: Employee["attendances"][number]) => ({
               ...attendance,
               dateTime: parseDate(attendance.dateTime),
               createdAt: parseDate(attendance.createdAt),
@@ -42,7 +42,7 @@ export const normalizeEmployee = (employee: Employee): Employee => ({
           }))
         : [],
     leaveRequests: Array.isArray(employee.leaveRequests)
-        ? employee.leaveRequests.map((leave) => ({
+        ? employee.leaveRequests.map((leave: Employee["leaveRequests"][number]) => ({
               ...leave,
               startDate: parseDate(leave.startDate),
               endDate: parseDate(leave.endDate),

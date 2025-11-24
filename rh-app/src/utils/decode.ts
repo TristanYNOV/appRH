@@ -1,4 +1,4 @@
-import type { ZodTypeAny } from "zod";
+import { type ZodTypeAny } from "zod";
 
 const areDeepEqual = (left: unknown, right: unknown) => {
     try {
