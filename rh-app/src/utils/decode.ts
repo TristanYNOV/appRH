@@ -17,6 +17,11 @@ const formatValue = (value: unknown) => {
 };
 
 export const decode = <T>(schema: ZodTypeAny, data: unknown, context: string): T => {
+    if (Array.isArray(data) && data.length === 0) {
+        console.info(`[DECODE][${context}] Tableau vide reçu, aucune validation nécessaire.`);
+        return [] as unknown as T;
+    }
+
     const result = schema.safeParse(data);
     if (!result.success) {
         console.error(`[DECODE][${context}]`, result.error.format());
