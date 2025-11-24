@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { DepartmentAPI } from "../HTTP/department.api.ts";
-import type { Department } from "../interfaces/department.codec.ts";
+import type {
+    CreateDepartmentPayload,
+    Department,
+    UpdateDepartmentPayload,
+} from "../interfaces/department.codec.ts";
 import { useApiAvailability } from "./useApiAvailability.ts";
 import { normalizeDepartment } from "../utils/dateNormalization.ts";
 import { extractErrorMessage } from "../utils/errorHandling.ts";
@@ -92,16 +96,10 @@ export const useDepartments = ({ enabled, onAvailabilityChange }: Options) => {
     }, [enabled, refreshKey, resetAvailability, syncAvailability]);
 
     const createDepartment = useCallback(
-        async (department: Department) => {
-            const { id: _tempId, ...rest } = department;
-            const payload: Partial<Department> = {
-                ...rest,
-                employees: undefined,
-            };
-
+        async (department: CreateDepartmentPayload) => {
             const toastId = toastService.departmentCreation(department);
             try {
-                const created = await DepartmentAPI.create(payload);
+                const created = await DepartmentAPI.create(department);
                 toastService.dismiss(toastId);
                 toastService.departmentCreated(normalizeDepartment(created));
                 syncAvailability(true);
@@ -116,14 +114,10 @@ export const useDepartments = ({ enabled, onAvailabilityChange }: Options) => {
     );
 
     const updateDepartment = useCallback(
-        async (department: Department) => {
-            const payload: Partial<Department> = {
-                ...department,
-                employees: undefined,
-            };
-            const toastId = toastService.departmentUpdate(department);
+        async (id: number, department: UpdateDepartmentPayload) => {
+            const toastId = toastService.departmentUpdate({ ...department, id });
             try {
-                const updated = await DepartmentAPI.update(payload);
+                const updated = await DepartmentAPI.update(id, department);
                 toastService.dismiss(toastId);
                 toastService.departmentUpdated(normalizeDepartment(updated));
                 syncAvailability(true);

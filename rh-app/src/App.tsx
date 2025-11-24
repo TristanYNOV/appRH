@@ -12,8 +12,16 @@ import DashboardLayout from "./components/dashboard/DashboardLayout.tsx";
 import { extractErrorMessage } from "./utils/errorHandling.ts";
 import apiClient, { DEFAULT_API_BASE_URL } from "./HTTP/httpClient.ts";
 
-import type { Department } from "./interfaces/department.codec.ts";
-import type { Employee } from "./interfaces/employee.codec.ts";
+import type {
+    CreateDepartmentPayload,
+    Department,
+    UpdateDepartmentPayload,
+} from "./interfaces/department.codec.ts";
+import type {
+    CreateEmployeePayload,
+    Employee,
+    UpdateEmployeePayload,
+} from "./interfaces/employee.codec.ts";
 import type { LeaveRequest } from "./interfaces/leaveRequest.codec.ts";
 
 const ATTENDANCE_API_AVAILABLE = false;
@@ -111,24 +119,24 @@ function App() {
         await dashboard.importDepartments(file);
     };
 
-    const handleCreateEmployee = async (employee: Employee) => {
+    const handleCreateEmployee = async (employee: CreateEmployeePayload) => {
         await dashboard.createEmployee(employee);
     };
 
-    const handleUpdateEmployee = async (employee: Employee) => {
-        await dashboard.updateEmployee(employee);
+    const handleUpdateEmployee = async (id: number, employee: UpdateEmployeePayload) => {
+        await dashboard.updateEmployee(id, employee);
     };
 
     const handleDeleteEmployee = async (id: number) => {
         await dashboard.deleteEmployee(id);
     };
 
-    const handleCreateDepartment = async (department: Department) => {
+    const handleCreateDepartment = async (department: CreateDepartmentPayload) => {
         await dashboard.createDepartment(department);
     };
 
-    const handleUpdateDepartment = async (department: Department) => {
-        await dashboard.updateDepartment(department);
+    const handleUpdateDepartment = async (id: number, department: UpdateDepartmentPayload) => {
+        await dashboard.updateDepartment(id, department);
     };
 
     const handleDeleteDepartment = async (id: number) => {

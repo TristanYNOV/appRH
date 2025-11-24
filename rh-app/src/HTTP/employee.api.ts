@@ -1,7 +1,14 @@
 // src/api/endpoints/employee.api.ts
 
 import apiClient from "./httpClient.ts";
-import { EmployeeCodec, EmployeePayloadCodec, type Employee } from "../interfaces/employee.codec.ts";
+import {
+    EmployeeAPICodec,
+    createEmployeeCodec,
+    type CreateEmployeePayload,
+    type Employee,
+    type UpdateEmployeePayload,
+    updateEmployeeCodec,
+} from "../interfaces/employee.codec.ts";
 import { decode } from "../utils/decode.ts";
 
 export const baseURLEmployee = "employees";
@@ -9,34 +16,34 @@ export const baseURLEmployee = "employees";
 export const EmployeeAPI = {
     async getAll(): Promise<Employee[]> {
         const data = await apiClient.get<unknown>(`/${baseURLEmployee}`);
-        return decode(EmployeeCodec.array(), data, "EmployeeAPI.getAll");
+        return decode(EmployeeAPICodec.array(), data, "EmployeeAPI.getAll");
     },
 
     async getById(id: number): Promise<Employee> {
         const data = await apiClient.get<unknown>(`/${baseURLEmployee}/${id}`);
-        return decode(EmployeeCodec, data, "EmployeeAPI.getById");
+        return decode(EmployeeAPICodec, data, "EmployeeAPI.getById");
     },
 
     async getByEmail(email: string): Promise<Employee> {
         const data = await apiClient.get<unknown>(`/${baseURLEmployee}/by-email/${email}`);
-        return decode(EmployeeCodec, data, "EmployeeAPI.getByEmail");
+        return decode(EmployeeAPICodec, data, "EmployeeAPI.getByEmail");
     },
 
-    async getByDepartmentId(employeeId: number): Promise<Employee> {
+    async getByDepartmentId(employeeId: number): Promise<Employee[]> {
         const data = await apiClient.get<unknown>(`/${baseURLEmployee}/by-department/${employeeId}`);
-        return decode(EmployeeCodec, data, "EmployeeAPI.getByDepartmentId");
+        return decode(EmployeeAPICodec.array(), data, "EmployeeAPI.getByDepartmentId");
     },
 
-    async create(employee: Partial<Employee>): Promise<Employee> {
-        const payload = decode(EmployeePayloadCodec, employee, "EmployeeAPI.create.payload");
+    async create(employee: CreateEmployeePayload): Promise<Employee> {
+        const payload = decode(createEmployeeCodec, employee, "EmployeeAPI.create.payload");
         const created = await apiClient.post<unknown>(`/${baseURLEmployee}`, payload);
-        return decode(EmployeeCodec, created, "EmployeeAPI.create.response");
+        return decode(EmployeeAPICodec, created, "EmployeeAPI.create.response");
     },
 
-    async update(employee: Partial<Employee>): Promise<Employee> {
-        const payload = decode(EmployeePayloadCodec, employee, "EmployeeAPI.update.payload");
-        const updated = await apiClient.put<unknown>(`/${baseURLEmployee}`, payload);
-        return decode(EmployeeCodec, updated, "EmployeeAPI.update.response");
+    async update(id: number, employee: UpdateEmployeePayload): Promise<Employee> {
+        const payload = decode(updateEmployeeCodec, employee, "EmployeeAPI.update.payload");
+        const updated = await apiClient.put<unknown>(`/${baseURLEmployee}/${id}`, payload);
+        return decode(EmployeeAPICodec, updated, "EmployeeAPI.update.response");
     },
 
     async remove(id: number): Promise<void> {

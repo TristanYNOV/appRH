@@ -1,6 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus, FaTrash, FaCalendarCheck, FaUmbrellaBeach, FaPen } from "react-icons/fa";
-import { eGender, type Employee, genderLabel } from "../../interfaces/employee.codec.ts";
+import {
+    eGender,
+    genderLabel,
+    type CreateEmployeePayload,
+    type Employee,
+    type UpdateEmployeePayload,
+} from "../../interfaces/employee.codec.ts";
 import type { Attendance } from "../../interfaces/attendance.codec.ts";
 import type { Department } from "../../interfaces/department.codec.ts";
 import type { LeaveRequest } from "../../interfaces/leaveRequest.codec.ts";
@@ -11,8 +17,8 @@ import EmployeeLeaveModal from "./modals/EmployeeLeaveModal.tsx";
 type Props = {
     employees: Employee[];
     departments?: Department[];
-    onCreate?: (emp: Employee) => void;
-    onUpdate?: (emp: Employee) => void;
+    onCreate?: (emp: CreateEmployeePayload) => void;
+    onUpdate?: (id: number, emp: UpdateEmployeePayload) => void;
     onDelete?: (id: number) => void;
     onCreateLeaveRequest?: (employeeId: number, leave: LeaveRequest) => void;
     onCreateAttendance?: (employeeId: number, attendance: Attendance) => void;
@@ -41,6 +47,14 @@ const EmployeeList: React.FC<Props> = ({
     disableLeaveActions = false,
     title = "Employees",
 }) => {
+    const parseFullName = (fullName?: string) => {
+        if (!fullName) return { firstName: "", lastName: "" };
+        const parts = fullName.trim().split(" ").filter(Boolean);
+        if (parts.length === 0) return { firstName: "", lastName: "" };
+        if (parts.length === 1) return { firstName: parts[0], lastName: "" };
+        return { firstName: parts[0], lastName: parts.slice(1).join(" ") };
+    };
+
     const [employeeForm, setEmployeeForm] = useState<
         { mode: "create" } | { mode: "update"; employeeId: number }
     >();
@@ -50,12 +64,11 @@ const EmployeeList: React.FC<Props> = ({
         () => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }),
         []
     );
-    const departmentById = useMemo(() => {
-        if (!departments) return new Map<number, Department>();
-        return new Map(departments.map((dept) => [dept.id, dept]));
-    }, [departments]);
 
-    const selectedEmployee: Employee | undefined = useMemo(() => {
+    const selectedEmployee: (Employee & {
+        attendances?: Attendance[];
+        leaveRequests?: LeaveRequest[];
+    }) | undefined = useMemo(() => {
         if (modal.type === "none") return undefined;
         return employees.find((e) => e.id === modal.employeeId);
     }, [modal, employees]);
@@ -94,26 +107,20 @@ const EmployeeList: React.FC<Props> = ({
         const hireDate = employeeFormEmployee.hireDate
             ? new Date(employeeFormEmployee.hireDate).toISOString().slice(0, 10)
             : "";
+        const { firstName, lastName } = parseFullName(employeeFormEmployee.fullName);
         return {
-            firstName: employeeFormEmployee.firstName ?? "",
-            lastName: employeeFormEmployee.lastName ?? "",
+            firstName,
+            lastName,
             gender: employeeFormEmployee.gender,
             email: employeeFormEmployee.email ?? "",
-            phone: employeeFormEmployee.phone ?? "",
+            phoneNumber: employeeFormEmployee.phoneNumber ?? "",
             address: employeeFormEmployee.address ?? "",
             position: employeeFormEmployee.position ?? "",
             salary: employeeFormEmployee.salary ? String(employeeFormEmployee.salary) : "",
             hireDate,
-            departmentId: employeeFormEmployee.departmentId
-                ? String(employeeFormEmployee.departmentId)
-                : "",
+            departmentName: employeeFormEmployee.departmentName ?? "",
         };
     }, [employeeFormEmployee]);
-
-    const nextEmpId = useMemo(
-        () => employees.reduce((m, e) => Math.max(m, e.id), 0) + 1,
-        [employees]
-    );
 
     const handleDelete = (id: number) => {
         if (onDelete) onDelete(id);
@@ -122,55 +129,40 @@ const EmployeeList: React.FC<Props> = ({
 
     const handleEmployeeSubmit = (values: EmployeeFormValues) => {
         const now = new Date();
+        const departmentName = values.departmentName.trim();
+
         if (employeeForm?.mode === "create") {
-            const departmentId = Number(values.departmentId || 0);
-            const department = departments?.find((d) => d.id === departmentId);
-            const employee: Employee = {
-                id: nextEmpId,
-                uniqueId: `EMP-${String(nextEmpId).padStart(4, "0")}`,
+            const payload: CreateEmployeePayload = {
                 firstName: values.firstName.trim(),
                 lastName: values.lastName.trim(),
                 gender: Number(values.gender) as eGender,
                 email: values.email.trim(),
-                phone: values.phone.trim(),
+                phoneNumber: values.phoneNumber.trim(),
                 address: values.address.trim(),
                 position: values.position.trim(),
                 salary: Number(values.salary || 0),
+                departmentName,
                 hireDate: values.hireDate ? new Date(values.hireDate) : now,
-                departmentId,
-                department,
-                attendances: [],
-                leaveRequests: [],
-                createdAt: now,
-                updatedAt: now,
-                createdBy: "HR-System",
-                updatedBy: "HR-System",
             };
 
-            if (onCreate) onCreate(employee);
-            else console.log("Create employee:", employee);
+            if (onCreate) onCreate(payload);
+            else console.log("Create employee payload:", payload);
         } else if (employeeForm?.mode === "update" && employeeFormEmployee) {
-            const departmentId = Number(values.departmentId || 0);
-            const department = departments?.find((d) => d.id === departmentId) ?? employeeFormEmployee.department;
-            const updatedEmployee: Employee = {
-                ...employeeFormEmployee,
+            const payload: UpdateEmployeePayload = {
                 firstName: values.firstName.trim(),
                 lastName: values.lastName.trim(),
                 gender: Number(values.gender) as eGender,
                 email: values.email.trim(),
-                phone: values.phone.trim(),
+                phoneNumber: values.phoneNumber.trim(),
                 address: values.address.trim(),
                 position: values.position.trim(),
-                salary: Number(values.salary || 0),
-                hireDate: values.hireDate ? new Date(values.hireDate) : employeeFormEmployee.hireDate,
-                departmentId,
-                department,
-                updatedAt: now,
-                updatedBy: "HR-System",
+                salary: values.salary ? Number(values.salary) : undefined,
+                hireDate: values.hireDate ? new Date(values.hireDate) : undefined,
+                departmentName,
             };
 
-            if (onUpdate) onUpdate(updatedEmployee);
-            else console.log("Update employee:", updatedEmployee);
+            if (onUpdate) onUpdate(employeeFormEmployee.id, payload);
+            else console.log("Update employee payload:", employeeFormEmployee.id, payload);
         }
 
         setEmployeeForm(undefined);
@@ -235,22 +227,18 @@ const EmployeeList: React.FC<Props> = ({
                                 <tr key={employee.id} className="border-t">
                                     <td className="px-4 py-3">{employee.id}</td>
                                     <td className="px-4 py-3 font-mono">{employee.uniqueId}</td>
-                                    <td className="px-4 py-3 font-medium">
-                                        {employee.lastName} {employee.firstName}
-                                    </td>
-                                    <td className="px-4 py-3">{genderLabel[employee.gender]}</td>
-                                    <td className="px-4 py-3">{employee.email}</td>
-                                    <td className="px-4 py-3">{employee.phone}</td>
-                                    <td className="px-4 py-3">{employee.position}</td>
-                                    <td className="px-4 py-3">{currencyFormatter.format(employee.salary)}</td>
-                                    <td className="px-4 py-3">
-                                        {employee.department?.name ?? departmentById.get(employee.departmentId)?.name ?? `#${employee.departmentId}`}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {employee.hireDate
-                                            ? employee.hireDate.toLocaleDateString("fr-FR")
-                                            : new Date(employee.hireDate).toLocaleDateString("fr-FR")}
-                                    </td>
+                                <td className="px-4 py-3 font-medium">{employee.fullName}</td>
+                                <td className="px-4 py-3">{genderLabel[employee.gender]}</td>
+                                <td className="px-4 py-3">{employee.email}</td>
+                                <td className="px-4 py-3">{employee.phoneNumber}</td>
+                                <td className="px-4 py-3">{employee.position}</td>
+                                <td className="px-4 py-3">{currencyFormatter.format(employee.salary)}</td>
+                                <td className="px-4 py-3">
+                                    {employee.departmentName}
+                                </td>
+                                <td className="px-4 py-3">
+                                    {new Date(employee.hireDate).toLocaleDateString("fr-FR")}
+                                </td>
                                     <td className="px-4 py-3">
                                         <div className="flex justify-end gap-2">
                                             <button

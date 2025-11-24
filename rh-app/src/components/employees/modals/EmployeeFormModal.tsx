@@ -8,12 +8,12 @@ export type EmployeeFormValues = {
     lastName: string;
     gender: eGender;
     email: string;
-    phone: string;
+    phoneNumber: string;
     address: string;
     position: string;
     salary: string;
     hireDate: string;
-    departmentId: string;
+    departmentName: string;
 };
 
 const createEmptyEmployeeForm = (): EmployeeFormValues => ({
@@ -21,12 +21,12 @@ const createEmptyEmployeeForm = (): EmployeeFormValues => ({
     lastName: "",
     gender: eGender.MALE,
     email: "",
-    phone: "",
+    phoneNumber: "",
     address: "",
     position: "",
     salary: "",
     hireDate: "",
-    departmentId: "",
+    departmentName: "",
 });
 
 type Props = {
@@ -137,8 +137,8 @@ const EmployeeFormModal: React.FC<Props> = ({
                         <label className="block text-sm mb-1">Téléphone</label>
                         <input
                             type="tel"
-                            value={form.phone}
-                            onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                            value={form.phoneNumber}
+                            onChange={(e) => setForm((f) => ({ ...f, phoneNumber: e.target.value }))}
                             className="w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="+33 6 12 34 56 78"
                         />
@@ -191,13 +191,14 @@ const EmployeeFormModal: React.FC<Props> = ({
                     <div>
                         <label className="block text-sm mb-1">Département</label>
                         <select
-                            value={form.departmentId}
-                            onChange={(e) => setForm((f) => ({ ...f, departmentId: e.target.value }))}
+                            value={form.departmentName}
+                            onChange={(e) => setForm((f) => ({ ...f, departmentName: e.target.value }))}
+                            required
                             className="w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="">— Choisir —</option>
                             {departments?.map((d) => (
-                                <option key={d.id} value={d.id}>
+                                <option key={d.id} value={d.name}>
                                     {d.name} ({d.code})
                                 </option>
                             ))}

@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { EmployeeAPI } from "../HTTP/employee.api.ts";
-import type { Employee } from "../interfaces/employee.codec.ts";
+import type {
+    CreateEmployeePayload,
+    Employee,
+    UpdateEmployeePayload,
+} from "../interfaces/employee.codec.ts";
 import { useApiAvailability } from "./useApiAvailability.ts";
 import { normalizeEmployee } from "../utils/dateNormalization.ts";
 import { extractErrorMessage } from "../utils/errorHandling.ts";
@@ -92,18 +96,10 @@ export const useEmployees = ({ enabled, onAvailabilityChange }: Options) => {
     }, [enabled, refreshKey, resetAvailability, syncAvailability]);
 
     const createEmployee = useCallback(
-        async (employee: Employee) => {
-            const { id: _tempId, ...rest } = employee;
-            const payload: Partial<Employee> = {
-                ...rest,
-                department: undefined,
-                attendances: undefined,
-                leaveRequests: undefined,
-            };
-
+        async (employee: CreateEmployeePayload) => {
             const toastId = toastService.employeeCreation(employee);
             try {
-                const created = await EmployeeAPI.create(payload);
+                const created = await EmployeeAPI.create(employee);
                 toastService.dismiss(toastId);
                 toastService.employeeCreated(normalizeEmployee(created));
                 syncAvailability(true);
@@ -118,16 +114,10 @@ export const useEmployees = ({ enabled, onAvailabilityChange }: Options) => {
     );
 
     const updateEmployee = useCallback(
-        async (employee: Employee) => {
-            const payload: Partial<Employee> = {
-                ...employee,
-                department: undefined,
-                attendances: undefined,
-                leaveRequests: undefined,
-            };
-            const toastId = toastService.employeeUpdate(employee);
+        async (id: number, employee: UpdateEmployeePayload) => {
+            const toastId = toastService.employeeUpdate({ ...employee, id });
             try {
-                const updated = await EmployeeAPI.update(payload);
+                const updated = await EmployeeAPI.update(id, employee);
                 toastService.dismiss(toastId);
                 toastService.employeeUpdated(normalizeEmployee(updated));
                 syncAvailability(true);

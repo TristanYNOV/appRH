@@ -19,7 +19,7 @@ type LeaveFormValues = {
 
 type Props = {
     isOpen: boolean;
-    employee: Employee | undefined;
+    employee: (Employee & { leaveRequests?: LeaveRequest[] }) | undefined;
     onClose: () => void;
     onSubmit: (leave: LeaveRequest) => void;
 };
@@ -61,7 +61,7 @@ const EmployeeLeaveModal: React.FC<Props> = ({ isOpen, employee, onClose, onSubm
             <div className="relative z-10 w-full max-w-4xl rounded-2xl bg-white p-6 shadow-xl">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xl font-semibold">
-                        Congés — {employee.lastName} {employee.firstName}
+                        Congés — {employee.fullName}
                     </h3>
                     <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100" aria-label="Fermer">
                         <FaTimes />

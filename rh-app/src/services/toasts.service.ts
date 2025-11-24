@@ -1,9 +1,21 @@
 import toast from "react-hot-toast";
 import type { Department } from "../interfaces/department.codec.ts";
-import type { Employee } from "../interfaces/employee.codec.ts";
+import type {
+    CreateEmployeePayload,
+    Employee,
+    UpdateEmployeePayload,
+} from "../interfaces/employee.codec.ts";
 import type { LeaveRequest } from "../interfaces/leaveRequest.codec.ts";
 
-const formatPerson = (employee: Employee) => `${employee.lastName} ${employee.firstName}`.trim();
+type PersonLike = Pick<Employee, "fullName"> | CreateEmployeePayload | UpdateEmployeePayload;
+
+const formatPerson = (employee: PersonLike) => {
+    if ("fullName" in employee && employee.fullName) return employee.fullName;
+    const firstName = "firstName" in employee && employee.firstName ? employee.firstName : "";
+    const lastName = "lastName" in employee && employee.lastName ? employee.lastName : "";
+    const full = `${lastName} ${firstName}`.trim();
+    return full.length > 0 ? full : "Employé";
+};
 
 export const toastService = {
     dismiss: (toastId: string | number | undefined) => {
@@ -27,14 +39,14 @@ export const toastService = {
 
     // EMPLOYEE
     employeeSyncFailed: (message: string) => toast.error(`Synchronisation des employés impossible : ${message}`),
-    employeeCreation: (employee: Employee) =>
+    employeeCreation: (employee: PersonLike) =>
         toast.loading(`Création de l'employé ${formatPerson(employee)} en cours…`),
-    employeeCreated: (employee: Employee) =>
+    employeeCreated: (employee: PersonLike) =>
         toast.success(`Employé ${formatPerson(employee)} créé avec succès !`),
     employeeCreationFailed: (message: string) => toast.error(`Création employé échouée : ${message}`),
-    employeeUpdate: (employee: Employee) =>
+    employeeUpdate: (employee: PersonLike) =>
         toast.loading(`Mise à jour de ${formatPerson(employee)} en cours…`),
-    employeeUpdated: (employee: Employee) =>
+    employeeUpdated: (employee: PersonLike) =>
         toast.success(`Employé ${formatPerson(employee)} mis à jour !`),
     employeeUpdateFailed: (message: string) => toast.error(`Mise à jour employé échouée : ${message}`),
     employeeDeletion: (employee: Employee) =>
