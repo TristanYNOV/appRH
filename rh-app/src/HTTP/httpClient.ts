@@ -28,6 +28,7 @@ export const normalizeApiBaseUrl = (url: string) => {
     try {
         parsed = new URL(ensureProtocol(trimmed));
     } catch (error) {
+        console.error(error)
         throw new Error("L'URL renseignée est invalide.");
     }
 

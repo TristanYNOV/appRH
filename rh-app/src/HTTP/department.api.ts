@@ -2,7 +2,7 @@ import apiClient from "./httpClient.ts";
 import { DepartmentCodec, DepartmentPayloadCodec, type Department } from "../interfaces/department.codec.ts";
 import { decode } from "../utils/decode.ts";
 
-export const baseURLDepartment = "department";
+export const baseURLDepartment = "departments";
 
 export const DepartmentAPI = {
     async getAll(): Promise<Department[]> {

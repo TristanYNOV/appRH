@@ -3,7 +3,6 @@ import { z } from "zod";
 import { AttendanceCodec } from "./attendance.codec.ts";
 import { BaseEntityCodec } from "./baseEntity.codec.ts";
 import { DepartmentCodec } from "./department.codec.ts";
-import { EmployeeReferenceCodec } from "./employeeReference.codec.ts";
 import { LeaveRequestCodec } from "./leaveRequest.codec.ts";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -22,16 +21,19 @@ export const genderLabel: Record<eGender, string> = {
 
 const employeeCoreCodec = BaseEntityCodec.extend({
     uniqueId: z.string(),
-    firstName: z.string(),
-    lastName: z.string(),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    fullName: z.string().optional(),
     gender: z.nativeEnum(eGender),
     email: z.string().email(),
-    phone: z.string(),
+    phone: z.string().optional(),
+    phoneNumber: z.string().optional(),
     address: z.string(),
     position: z.string(),
     salary: z.number(),
     hireDate: z.coerce.date(),
-    departmentId: z.number(),
+    departmentId: z.number().optional(),
+    departmentName: z.string().optional(),
 });
 
 const employeeRelationsCodec = z.object({

@@ -4,7 +4,7 @@ import apiClient from "./httpClient.ts";
 import { EmployeeCodec, EmployeePayloadCodec, type Employee } from "../interfaces/employee.codec.ts";
 import { decode } from "../utils/decode.ts";
 
-export const baseURLEmployee = "employee";
+export const baseURLEmployee = "employees";
 
 export const EmployeeAPI = {
     async getAll(): Promise<Employee[]> {
