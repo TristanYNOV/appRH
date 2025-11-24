@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { DepartmentAPI } from "../HTTP/department.api.ts";
+import type { Department } from "../interfaces/department.codec.ts";
 import { useApiAvailability } from "./useApiAvailability.ts";
 import { normalizeDepartment } from "../utils/dateNormalization.ts";
 import { extractErrorMessage } from "../utils/errorHandling.ts";
 import { toastService } from "../services/toasts.service.ts";
-
-import type { Department } from "../interfaces/department.interface.ts";
 
 type Options = {
     enabled: boolean;

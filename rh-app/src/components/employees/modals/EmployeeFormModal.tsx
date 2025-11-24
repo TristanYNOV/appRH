@@ -1,11 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FaTimes } from "react-icons/fa";
-import {
-    eGender,
-    genderLabel,
-    genderOptions,
-} from "../../../interfaces/employee.interface.ts";
-import type { Department } from "../../../interfaces/department.interface.ts";
+import { eGender, genderLabel, genderOptions } from "../../../interfaces/employee.codec.ts";
+import type { Department } from "../../../interfaces/department.codec.ts";
 
 export type EmployeeFormValues = {
     firstName: string;

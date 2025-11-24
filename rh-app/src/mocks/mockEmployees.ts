@@ -1,4 +1,4 @@
-import {eGender, type Employee} from "../interfaces/employee.interface.ts";
+import { eGender, type Employee } from "../interfaces/employee.codec.ts";
 
 export const mockedEmployees: Employee[] = [
     {

@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { EmployeeAPI } from "../HTTP/employee.api.ts";
+import type { Employee } from "../interfaces/employee.codec.ts";
 import { useApiAvailability } from "./useApiAvailability.ts";
 import { normalizeEmployee } from "../utils/dateNormalization.ts";
 import { extractErrorMessage } from "../utils/errorHandling.ts";
 import { toastService } from "../services/toasts.service.ts";
-
-import type { Employee } from "../interfaces/employee.interface.ts";
 
 type Options = {
     enabled: boolean;

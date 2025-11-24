@@ -1,4 +1,4 @@
-import type {Department} from "../interfaces/department.interface.ts";
+import type { Department } from "../interfaces/department.codec.ts";
 import {mockedEmployees} from "./mockEmployees.ts";
 
 export const mockedDepartments: Department[] = [

@@ -1,7 +1,1 @@
-export interface BaseEntity {
-    id: number,
-    createdAt: Date,
-    updatedAt: Date,
-    createdBy: string,
-    updatedBy: string
-}
+export { BaseEntityCodec, type BaseEntity } from "./baseEntity.codec.ts";

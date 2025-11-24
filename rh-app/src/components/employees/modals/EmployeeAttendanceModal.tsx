@@ -1,6 +1,6 @@
 import React from "react";
 import { FaTimes } from "react-icons/fa";
-import type { Employee } from "../../../interfaces/employee.interface.ts";
+import type { Employee } from "../../../interfaces/employee.codec.ts";
 
 type Props = {
     isOpen: boolean;
