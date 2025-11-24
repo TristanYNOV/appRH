@@ -3,6 +3,7 @@ import { z } from "zod";
 import { AttendanceCodec } from "./attendance.codec.ts";
 import { BaseEntityCodec } from "./baseEntity.codec.ts";
 import { DepartmentCodec } from "./department.codec.ts";
+import { EmployeeReferenceCodec } from "./employeeReference.codec.ts";
 import { LeaveRequestCodec } from "./leaveRequest.codec.ts";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -33,16 +34,6 @@ const employeeCoreCodec = BaseEntityCodec.extend({
     departmentId: z.number(),
 });
 
-export const EmployeeReferenceCodec = BaseEntityCodec.pick({ id: true })
-    .extend({
-        uniqueId: z.string().optional(),
-        firstName: z.string().optional(),
-        lastName: z.string().optional(),
-        email: z.string().email().optional(),
-        departmentId: z.number().optional(),
-    })
-    .passthrough();
-
 const employeeRelationsCodec = z.object({
     department: z.lazy(() => DepartmentCodec.omit({ employees: true })).optional(),
     attendances: z.array(z.lazy(() => AttendanceCodec.omit({ employee: true }))).optional().default([]),
@@ -54,3 +45,5 @@ export const EmployeeCodec = employeeCoreCodec.merge(employeeRelationsCodec).str
 export const EmployeePayloadCodec = EmployeeCodec.partial();
 
 export type Employee = z.infer<typeof EmployeeCodec>;
+
+export { EmployeeReferenceCodec } from "./employeeReference.codec.ts";

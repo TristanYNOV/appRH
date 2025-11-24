@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { BaseEntityCodec } from "./baseEntity.codec.ts";
-import { EmployeeReferenceCodec } from "./employee.codec.ts";
+import { EmployeeReferenceCodec } from "./employeeReference.codec.ts";
 
 export const AttendanceCodec = BaseEntityCodec.extend({
     dateTime: z.coerce.date(),
