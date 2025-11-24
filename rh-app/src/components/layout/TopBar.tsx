@@ -31,7 +31,7 @@ const TopBar: React.FC<TopBarProps> = ({
                 className="flex items-center gap-2 px-3 py-2 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 transition"
             >
                 <FaCog />
-                <span>Configurer l&apos;API</span>
+                <span className="hidden sm:block">Configurer l&apos;API</span>
             </button>
             <button
                 type="button"
@@ -46,7 +46,7 @@ const TopBar: React.FC<TopBarProps> = ({
                 }`}
             >
                 <FaSync className={isReconnecting ? "animate-spin" : ""} />
-                <span>{hasApiIssue ? "Reconnexion API" : "Vérifier l'API"}</span>
+                <span className="hidden sm:block">{hasApiIssue ? "Reconnexion API" : "Vérifier l'API"}</span>
             </button>
         </div>
 
@@ -57,7 +57,7 @@ const TopBar: React.FC<TopBarProps> = ({
                     className="flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition"
                 >
                     <FaSignInAlt />
-                    Se connecter
+                    <span className="hidden sm:block">Se connecter</span>
                 </button>
             ) : (
                 <button
@@ -65,7 +65,7 @@ const TopBar: React.FC<TopBarProps> = ({
                     className="flex items-center gap-2 bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition"
                 >
                     <FaSignOutAlt />
-                    Se déconnecter
+                    <span className="hidden sm:block">Se déconnecter</span>
                 </button>
             )}
         </div>
