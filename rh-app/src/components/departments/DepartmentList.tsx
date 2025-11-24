@@ -89,7 +89,7 @@ const DepartmentList: React.FC<Props> = ({
                         setModal({ mode: "create" });
                     }}
                     disabled={actionsDisabled}
-                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50${
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 ${
                         actionsDisabled ? " opacity-60 cursor-not-allowed" : ""
                     }`}
                 >
@@ -137,7 +137,7 @@ const DepartmentList: React.FC<Props> = ({
                                                     setModal({ mode: "update", departmentId: dept.id });
                                                 }}
                                                 disabled={actionsDisabled}
-                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100${
+                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 ${
                                                     actionsDisabled ? " opacity-60 cursor-not-allowed" : ""
                                                 }`}
                                                 aria-label={`Modifier ${dept.name}`}
@@ -151,7 +151,7 @@ const DepartmentList: React.FC<Props> = ({
                                                     handleDelete(dept.id);
                                                 }}
                                                 disabled={actionsDisabled}
-                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100${
+                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 ${
                                                     actionsDisabled ? " opacity-60 cursor-not-allowed" : ""
                                                 }`}
                                                 aria-label={`Supprimer ${dept.name}`}

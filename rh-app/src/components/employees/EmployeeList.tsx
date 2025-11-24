@@ -188,7 +188,7 @@ const EmployeeList: React.FC<Props> = ({
                         setEmployeeForm({ mode: "create" });
                     }}
                     disabled={disableCrudActions}
-                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50${
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 ${
                         disableCrudActions ? " opacity-60 cursor-not-allowed" : ""
                     }`}
                 >
@@ -252,7 +252,7 @@ const EmployeeList: React.FC<Props> = ({
                                                     setEmployeeForm({ mode: "update", employeeId: employee.id });
                                                 }}
                                                 disabled={disableCrudActions}
-                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100${
+                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 ${
                                                     disableCrudActions ? " opacity-60 cursor-not-allowed" : ""
                                                 }`}
                                                 title="Modifier"
@@ -265,7 +265,7 @@ const EmployeeList: React.FC<Props> = ({
                                                     setModal({ type: "attendance", employeeId: employee.id });
                                                 }}
                                                 disabled={disableAttendanceActions}
-                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100${
+                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 ${
                                                     disableAttendanceActions ? " opacity-60 cursor-not-allowed" : ""
                                                 }`}
                                                 title="Voir présences"
@@ -279,7 +279,7 @@ const EmployeeList: React.FC<Props> = ({
                                                     setModal({ type: "leave", employeeId: employee.id });
                                                 }}
                                                 disabled={disableLeaveActions}
-                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100${
+                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 ${
                                                     disableLeaveActions ? " opacity-60 cursor-not-allowed" : ""
                                                 }`}
                                                 title="Voir/Faire une demande de congé"
@@ -293,7 +293,7 @@ const EmployeeList: React.FC<Props> = ({
                                                     handleDelete(employee.id);
                                                 }}
                                                 disabled={disableCrudActions}
-                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100${
+                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 ${
                                                     disableCrudActions ? " opacity-60 cursor-not-allowed" : ""
                                                 }`}
                                                 title="Supprimer"
