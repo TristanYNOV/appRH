@@ -49,10 +49,12 @@ const EmployeeFormModal: React.FC<Props> = ({
     title,
 }) => {
     const [form, setForm] = useState<EmployeeFormValues>(createEmptyEmployeeForm());
+    const [errors, setErrors] = useState<{ firstName?: string; lastName?: string }>({});
 
     useEffect(() => {
         if (!isOpen) return;
         setForm({ ...createEmptyEmployeeForm(), ...initialValues });
+        setErrors({});
     }, [isOpen, initialValues]);
 
     const computedTitle = useMemo(() => {
@@ -61,6 +63,18 @@ const EmployeeFormModal: React.FC<Props> = ({
     }, [mode, title]);
 
     const submitLabel = mode === "create" ? "Créer" : "Mettre à jour";
+
+    const validateNames = (values: EmployeeFormValues) => {
+        const newErrors: { firstName?: string; lastName?: string } = {};
+        if (values.firstName.trim().length < 3) {
+            newErrors.firstName = "Le prénom doit contenir au moins 3 lettres.";
+        }
+        if (values.lastName.trim().length < 3) {
+            newErrors.lastName = "Le nom doit contenir au moins 3 lettres.";
+        }
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     if (!isOpen) return null;
 
@@ -79,6 +93,7 @@ const EmployeeFormModal: React.FC<Props> = ({
                     className="grid grid-cols-1 md:grid-cols-2 gap-4"
                     onSubmit={(event) => {
                         event.preventDefault();
+                        if (!validateNames(form)) return;
                         onSubmit(form);
                     }}
                 >
@@ -86,24 +101,34 @@ const EmployeeFormModal: React.FC<Props> = ({
                         <label className="block text-sm mb-1">Prénom</label>
                         <input
                             type="text"
+                            minLength={3}
                             required
                             value={form.firstName}
-                            onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
+                            onChange={(e) => {
+                                setForm((f) => ({ ...f, firstName: e.target.value }));
+                                setErrors((prev) => ({ ...prev, firstName: undefined }));
+                            }}
                             className="w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Alice"
                         />
+                        {errors.firstName && <p className="text-sm text-red-600 mt-1">{errors.firstName}</p>}
                     </div>
 
                     <div>
                         <label className="block text-sm mb-1">Nom</label>
                         <input
                             type="text"
+                            minLength={3}
                             required
                             value={form.lastName}
-                            onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
+                            onChange={(e) => {
+                                setForm((f) => ({ ...f, lastName: e.target.value }));
+                                setErrors((prev) => ({ ...prev, lastName: undefined }));
+                            }}
                             className="w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Dupont"
                         />
+                        {errors.lastName && <p className="text-sm text-red-600 mt-1">{errors.lastName}</p>}
                     </div>
 
                     <div>
