@@ -24,7 +24,7 @@ const DepartmentList: React.FC<Props> = ({
     onDelete,
     isLoading = false,
     actionsDisabled = false,
-    title = "Departments",
+    title = "liste des départements",
 }) => {
     const [modal, setModal] = useState<
         { mode: "create" } | { mode: "update"; departmentId: number }
