@@ -8,11 +8,12 @@ import {
     type AttendanceUpdate,
 } from "../interfaces/attendance.codec.ts";
 import { decode } from "../utils/decode.ts";
-import { formatDateTime } from "../utils/dateFormat.ts";
+import { formatDateTimeLocal } from "../utils/dateFormat.ts";
 
 export const baseURLAttendance = "attendances";
 
-const formatAttendanceDate = (value: string | number | Date): string => formatDateTime(value);
+const formatAttendanceDate = (value: string | number | Date): string =>
+    formatDateTimeLocal(value);
 
 export const AttendanceAPI = {
     async getAll(): Promise<AttendanceAPI[]> {
