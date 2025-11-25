@@ -56,13 +56,9 @@ function App() {
         deleteDepartment,
         isFileApiAvailable,
         isImportingEmployees,
-        isImportingDepartments,
         isExportingEmployees,
-        isExportingDepartments,
         importEmployees,
-        importDepartments,
         exportEmployees,
-        exportDepartments,
         loadEmployees,
         loadAttendances,
         loadDepartments,
@@ -83,12 +79,9 @@ function App() {
     const featureReminder = useFeatureReminder(isAuthenticated, missingFeatures);
 
     const employeeFileInputRef = useRef<HTMLInputElement | null>(null);
-    const departmentFileInputRef = useRef<HTMLInputElement | null>(null);
 
     const disableEmployeeImport = !isFileApiAvailable || isImportingEmployees;
-    const disableDepartmentImport = !isFileApiAvailable || isImportingDepartments;
     const disableEmployeeExport = !isFileApiAvailable || isExportingEmployees;
-    const disableDepartmentExport = !isFileApiAvailable || isExportingDepartments;
     const disableAttendanceActions = !isAttendanceApiAvailable || !isEmployeeApiAvailable;
     const disableLeaveActions = !LEAVE_API_AVAILABLE || !isEmployeeApiAvailable;
 
@@ -203,23 +196,11 @@ function App() {
         employeeFileInputRef.current?.click();
     };
 
-    const triggerDepartmentImport = () => {
-        if (disableDepartmentImport) return;
-        departmentFileInputRef.current?.click();
-    };
-
     const onImportEmployees = async (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         event.target.value = "";
         if (!file) return;
         await importEmployees(file);
-    };
-
-    const onImportDepartments = async (event: ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        event.target.value = "";
-        if (!file) return;
-        await importDepartments(file);
     };
 
     const handleCreateEmployee = async (employee: CreateEmployeePayload) => {
@@ -377,17 +358,11 @@ function App() {
                     onDeleteDepartment={handleDeleteDepartment}
                     onCreateLeaveRequest={handleCreateLeaveRequest}
                     onEmployeeImportClick={triggerEmployeeImport}
-                    onDepartmentImportClick={triggerDepartmentImport}
                     onExportEmployees={exportEmployees}
-                    onExportDepartments={exportDepartments}
                     onEmployeeFileChange={onImportEmployees}
-                    onDepartmentFileChange={onImportDepartments}
                     employeeFileInputRef={employeeFileInputRef}
-                    departmentFileInputRef={departmentFileInputRef}
                     disableEmployeeImport={disableEmployeeImport}
-                    disableDepartmentImport={disableDepartmentImport}
                     disableEmployeeExport={disableEmployeeExport}
-                    disableDepartmentExport={disableDepartmentExport}
                     disableAttendanceActions={disableAttendanceActions}
                     disableLeaveActions={disableLeaveActions}
                 />

@@ -21,9 +21,7 @@ export const createFileTransferSlice: StoreCreator<FileTransferSlice> = (set, ge
     return {
         isFileApiAvailable: true,
         isImportingEmployees: false,
-        isImportingDepartments: false,
         isExportingEmployees: false,
-        isExportingDepartments: false,
         importEmployees: async (file) => {
             set({ isImportingEmployees: true });
             const toastId = toastService.fileImporting("employés");
@@ -40,24 +38,6 @@ export const createFileTransferSlice: StoreCreator<FileTransferSlice> = (set, ge
                 void checkHealth();
             } finally {
                 set({ isImportingEmployees: false });
-            }
-        },
-        importDepartments: async (file) => {
-            set({ isImportingDepartments: true });
-            const toastId = toastService.fileImporting("départements");
-            try {
-                await FileAPI.importDepartments(file);
-                toastService.dismiss(toastId);
-                toastService.fileImported("départements");
-                restoreFileAvailability(set);
-                await get().loadDepartments();
-            } catch (error) {
-                toastService.dismiss(toastId);
-                toastService.fileImportFailed("départements", extractErrorMessage(error));
-                markFileUnavailable(set);
-                void checkHealth();
-            } finally {
-                set({ isImportingDepartments: false });
             }
         },
         exportEmployees: async () => {
@@ -78,24 +58,6 @@ export const createFileTransferSlice: StoreCreator<FileTransferSlice> = (set, ge
                 set({ isExportingEmployees: false });
             }
         },
-        exportDepartments: async () => {
-            set({ isExportingDepartments: true });
-            const toastId = toastService.fileExporting("départements");
-            try {
-                const blob = await FileAPI.exportDepartments();
-                downloadBlob(blob, `departments-${new Date().toISOString()}.xlsx`);
-                toastService.dismiss(toastId);
-                toastService.fileExported("départements");
-                restoreFileAvailability(set);
-            } catch (error) {
-                toastService.dismiss(toastId);
-                toastService.fileExportFailed("départements", extractErrorMessage(error));
-                markFileUnavailable(set);
-                void checkHealth();
-            } finally {
-                set({ isExportingDepartments: false });
-            }
-        },
         checkFileAvailability: async () => {
             try {
                 await checkHealth();
@@ -108,9 +70,7 @@ export const createFileTransferSlice: StoreCreator<FileTransferSlice> = (set, ge
             set({
                 isFileApiAvailable: true,
                 isImportingEmployees: false,
-                isImportingDepartments: false,
                 isExportingEmployees: false,
-                isExportingDepartments: false,
             }),
     };
 };

@@ -40,18 +40,13 @@ export const useDashboardState = (isAuthenticated: boolean) => {
     const {
         isAvailable: isFileApiAvailable,
         isImportingEmployees,
-        isImportingDepartments,
         isExportingEmployees,
-        isExportingDepartments,
         importEmployees,
-        importDepartments,
         exportEmployees,
-        exportDepartments,
         reset: resetFileTransfers,
         checkAvailability: checkFileAvailability,
     } = useFileTransfers({
         onEmployeesUpdated: refreshEmployees,
-        onDepartmentsUpdated: refreshDepartments,
     });
 
     const reconnectApis = useCallback(async () => {
@@ -88,13 +83,9 @@ export const useDashboardState = (isAuthenticated: boolean) => {
         deleteDepartment,
         isFileApiAvailable,
         isImportingEmployees,
-        isImportingDepartments,
         isExportingEmployees,
-        isExportingDepartments,
         importEmployees,
-        importDepartments,
         exportEmployees,
-        exportDepartments,
         refreshEmployees,
         refreshDepartments,
         reconnectApis,
