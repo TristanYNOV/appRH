@@ -1,3 +1,4 @@
+import type { Attendance, AttendanceAPI } from "../interfaces/attendance.codec.ts";
 import type { Department } from "../interfaces/department.codec.ts";
 import type { Employee } from "../interfaces/employee.codec.ts";
 
@@ -21,6 +22,11 @@ export const normalizeDepartment = (department: Department): Department => ({
 export const normalizeEmployee = (employee: Employee): Employee => ({
     ...employee,
     hireDate: parseDate(employee.hireDate),
+});
+
+export const normalizeAttendance = (attendance: Attendance | AttendanceAPI): Attendance => ({
+    ...attendance,
+    date: parseDate(attendance.date),
 });
 
 export type { Employee, Department, LeaveRequest };
