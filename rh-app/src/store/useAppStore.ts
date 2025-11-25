@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+import { registerAccessTokenProvider } from "../HTTP/httpClient.ts";
 import { createAuthSlice } from "./slices/authSlice.ts";
 import { createAttendanceSlice } from "./slices/attendanceSlice.ts";
 import { createDashboardSlice } from "./slices/dashboardSlice.ts";
@@ -29,8 +30,9 @@ export const useAppStore = create<AppState>()(
             partialize: (state) => ({
                 apiBaseUrl: state.apiBaseUrl,
                 displayMode: state.displayMode,
-                isAuthenticated: state.isAuthenticated,
             }),
         }
     )
 );
+
+registerAccessTokenProvider(() => useAppStore.getState().accessToken);

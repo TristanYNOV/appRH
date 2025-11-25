@@ -12,6 +12,7 @@ import type {
     UpdateEmployeePayload,
 } from "../interfaces/employee.codec.ts";
 import type { LeaveRequest } from "../interfaces/leaveRequest.codec.ts";
+import type { AuthUser } from "../interfaces/auth.interface.ts";
 
 export type DisplayMode = "employee" | "department" | "attendance";
 export type AuthMode = "login" | "signup" | null;
@@ -24,7 +25,9 @@ export interface PreferenceSlice {
 export interface AuthSlice {
     isAuthenticated: boolean;
     authMode: AuthMode;
-    login: () => void;
+    accessToken: string | null;
+    user: AuthUser | null;
+    login: (accessToken: string, user: AuthUser) => void;
     logout: () => void;
     openAuth: (mode: Exclude<AuthMode, null>) => void;
     closeAuth: () => void;

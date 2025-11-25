@@ -21,6 +21,7 @@ import type {
 } from "./interfaces/attendance.codec.ts";
 import type { CreateEmployeePayload, UpdateEmployeePayload } from "./interfaces/employee.codec.ts";
 import type { LeaveRequest } from "./interfaces/leaveRequest.codec.ts";
+import type { AuthLoginPayload, AuthRegisterPayload } from "./interfaces/auth.interface.ts";
 
 const LEAVE_API_AVAILABLE = false;
 
@@ -32,6 +33,7 @@ function App() {
         closeAuth,
         login,
         logout,
+        accessToken,
         displayMode,
         setDisplayMode,
         employees,
@@ -97,6 +99,34 @@ function App() {
         !isFileApiAvailable;
 
     useEffect(() => {
+        if (accessToken) {
+            return;
+        }
+
+        const refreshToken = authService.getRefreshToken();
+        if (!refreshToken) {
+            return;
+        }
+
+        const refreshSession = async () => {
+            const toastId = toastService.authAttempt();
+            try {
+                const session = await authService.refreshAccessToken(refreshToken);
+                authService.storeRefreshToken(session.refreshToken);
+                login(session.accessToken, session.user);
+                toastService.dismiss(toastId);
+                toastService.authSuccess();
+            } catch (error) {
+                toastService.dismiss(toastId);
+                authService.clearRefreshToken();
+                toastService.authFailed(extractErrorMessage(error));
+            }
+        };
+
+        void refreshSession();
+    }, [accessToken, login]);
+
+    useEffect(() => {
         if (!isAuthenticated) {
             resetAfterLogout();
             return;
@@ -115,12 +145,12 @@ function App() {
         resetAfterLogout,
     ]);
 
-    const handleAuth = async (email: string, password: string, mode: "login" | "signup") => {
+    const handleLogin = async (credentials: AuthLoginPayload) => {
         const toastId = toastService.authAttempt();
         try {
-            const mockToken = window.btoa(`${email}:${password}:${mode}:${Date.now()}`);
-            authService.storeToken(mockToken);
-            login();
+            const session = await authService.login(credentials);
+            authService.storeRefreshToken(session.refreshToken);
+            login(session.accessToken, session.user);
             closeAuth();
             toastService.dismiss(toastId);
             toastService.authSuccess();
@@ -130,8 +160,28 @@ function App() {
         }
     };
 
-    const handleLogout = () => {
-        authService.clearToken();
+    const handleRegister = async (payload: AuthRegisterPayload) => {
+        const toastId = toastService.authAttempt();
+        try {
+            const session = await authService.register(payload);
+            authService.storeRefreshToken(session.refreshToken);
+            login(session.accessToken, session.user);
+            closeAuth();
+            toastService.dismiss(toastId);
+            toastService.authSuccess();
+        } catch (error) {
+            toastService.dismiss(toastId);
+            toastService.authFailed(extractErrorMessage(error));
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await authService.revokeToken();
+        } catch (error) {
+            console.error("Erreur lors de la révocation du refreshToken", error);
+        }
+        authService.clearRefreshToken();
         logout();
         closeAuth();
         resetAfterLogout();
@@ -300,7 +350,9 @@ function App() {
                 </div>
             )}
 
-            {!isAuthenticated && authMode && <AuthForm onSubmit={handleAuth} />}
+            {!isAuthenticated && authMode && (
+                <AuthForm onLogin={handleLogin} onRegister={handleRegister} />
+            )}
 
             {isAuthenticated && (
                 <DashboardLayout

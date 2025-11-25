@@ -6,10 +6,17 @@ import axios, {
     type AxiosResponse,
     type AxiosError,
 } from "axios";
-import { authService } from "../services/auth.service.ts";
+type AccessTokenProvider = () => string | undefined;
+
+let accessTokenProvider: AccessTokenProvider = () => undefined;
+
+export const registerAccessTokenProvider = (provider: AccessTokenProvider) => {
+    accessTokenProvider = provider;
+};
 
 const API_BASE_URL_STORAGE_KEY = "appRH_api_base_url" as const;
-export const DEFAULT_API_BASE_URL = "http://localhost:5171/api" as const;
+const DEFAULT_BACKEND_API_BASE_URL = "http://localhost:5171/api" as const;
+export const DEFAULT_API_BASE_URL = typeof window !== "undefined" ? "/api" : DEFAULT_BACKEND_API_BASE_URL;
 
 const ensureProtocol = (url: string) => {
     if (/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(url)) {
@@ -22,6 +29,10 @@ export const normalizeApiBaseUrl = (url: string) => {
     const trimmed = url.trim();
     if (!trimmed) {
         throw new Error("L'URL de l'API ne peut pas être vide.");
+    }
+
+    if (trimmed.startsWith("/")) {
+        return trimmed.replace(/\/+$/, "") || "/";
     }
 
     let parsed: URL;
@@ -72,7 +83,7 @@ class HTTPClient {
             headers: {
                 "Content-Type": "application/json",
             },
-            withCredentials: false,
+            withCredentials: true,
         });
 
         this.setupInterceptors(client);
@@ -82,9 +93,9 @@ class HTTPClient {
     private setupInterceptors(client: AxiosInstance) {
         client.interceptors.request.use(
             (config) => {
-                const token = authService.getToken();
-                if (token) {
-                    config.headers.Authorization = `Bearer ${token}`;
+                const accessToken = accessTokenProvider();
+                if (accessToken) {
+                    config.headers.Authorization = `Bearer ${accessToken}`;
                 }
                 return config;
             },
