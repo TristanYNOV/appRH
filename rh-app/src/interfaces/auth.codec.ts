@@ -7,7 +7,7 @@ export const authUserSchema = z.object({
     firstName: z.string(),
     lastName: z.string(),
     roles: z.array(z.string()),
-    employeeId: z.number().int(),
+    employeeId: z.union([z.number().int(), z.null()]),
 });
 
 export const authLoginPayloadCodec = z.object({
@@ -28,7 +28,7 @@ export const authRegisterPayloadCodec = z.object({
 export const authRegisterAndLoginResponseCodec = z.object({
     accessToken: z.string(),
     refreshToken: z.string(),
-    expiresAt: z.string().datetime(),
+    expiresAt: z.string(),
     user: authUserSchema,
 });
 
