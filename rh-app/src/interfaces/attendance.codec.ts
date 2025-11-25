@@ -21,7 +21,7 @@ const attendanceBase = {
 
 export const attendanceAPICodec = z.object({
     ...attendanceBase,
-    date: z.string().datetime(), // "2025-11-26T19:50:34.44Z"
+    date: z.string(),
 });
 export type AttendanceAPI = z.infer<typeof attendanceAPICodec>;
 
@@ -32,7 +32,7 @@ export const attendanceCodec = z.object({
 export type Attendance = z.infer<typeof attendanceCodec>;
 
 export const attendanceCreateCodec = z.object({
-    date: z.string().datetime(), // "2025-11-26T19:50:34.4400000Z"
+    date: z.string().datetime({ offset: false }),
     clockIn: timeStringSchema,
     clockOut: timeStringSchema,
     breakDuration: timeStringSchema,
