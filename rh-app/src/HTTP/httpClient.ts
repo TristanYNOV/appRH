@@ -15,7 +15,8 @@ export const registerAccessTokenProvider = (provider: AccessTokenProvider) => {
 };
 
 const API_BASE_URL_STORAGE_KEY = "appRH_api_base_url" as const;
-export const DEFAULT_API_BASE_URL = "http://localhost:5171/api" as const;
+const DEFAULT_BACKEND_API_BASE_URL = "http://localhost:5171/api" as const;
+export const DEFAULT_API_BASE_URL = typeof window !== "undefined" ? "/api" : DEFAULT_BACKEND_API_BASE_URL;
 
 const ensureProtocol = (url: string) => {
     if (/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(url)) {
@@ -28,6 +29,10 @@ export const normalizeApiBaseUrl = (url: string) => {
     const trimmed = url.trim();
     if (!trimmed) {
         throw new Error("L'URL de l'API ne peut pas être vide.");
+    }
+
+    if (trimmed.startsWith("/")) {
+        return trimmed.replace(/\/+$/, "") || "/";
     }
 
     let parsed: URL;
