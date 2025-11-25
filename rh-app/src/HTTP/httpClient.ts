@@ -6,7 +6,13 @@ import axios, {
     type AxiosResponse,
     type AxiosError,
 } from "axios";
-import { useAppStore } from "../store/useAppStore.ts";
+type AccessTokenProvider = () => string | undefined;
+
+let accessTokenProvider: AccessTokenProvider = () => undefined;
+
+export const registerAccessTokenProvider = (provider: AccessTokenProvider) => {
+    accessTokenProvider = provider;
+};
 
 const API_BASE_URL_STORAGE_KEY = "appRH_api_base_url" as const;
 export const DEFAULT_API_BASE_URL = "http://localhost:5171/api" as const;
@@ -82,7 +88,7 @@ class HTTPClient {
     private setupInterceptors(client: AxiosInstance) {
         client.interceptors.request.use(
             (config) => {
-                const accessToken = useAppStore.getState().accessToken;
+                const accessToken = accessTokenProvider();
                 if (accessToken) {
                     config.headers.Authorization = `Bearer ${accessToken}`;
                 }

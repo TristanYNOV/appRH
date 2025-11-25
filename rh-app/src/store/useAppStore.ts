@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+import { registerAccessTokenProvider } from "../HTTP/httpClient.ts";
 import { createAuthSlice } from "./slices/authSlice.ts";
 import { createAttendanceSlice } from "./slices/attendanceSlice.ts";
 import { createDashboardSlice } from "./slices/dashboardSlice.ts";
@@ -33,3 +34,5 @@ export const useAppStore = create<AppState>()(
         }
     )
 );
+
+registerAccessTokenProvider(() => useAppStore.getState().accessToken);
