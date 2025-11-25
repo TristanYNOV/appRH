@@ -1,73 +1,69 @@
-# React + TypeScript + Vite
+# appRH (Vite + React + TypeScript)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Documentation d'installation et d'usage pour l'application RH front-end construite avec Vite, React 19 et TypeScript.
 
-Currently, two official plugins are available:
+## Prérequis
+- Node.js 20+ et npm
+- Accès au backend exposant l'API (par défaut proxifiée sur `/api` ou `http://localhost:5171/api`).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Installation
+1. Cloner le dépôt et se placer dans `rh-app`.
+2. Installer les dépendances :
+   ```bash
+   npm install
+   ```
 
-## React Compiler
+## Lancer le projet
+- **Développement** (avec HMR) :
+  ```bash
+  npm run dev
+  ```
+  Vite démarre sur `http://localhost:5173`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Lint** :
+  ```bash
+  npm run lint
+  ```
 
-## Expanding the ESLint configuration
+- **Build production** :
+  ```bash
+  npm run build
+  ```
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Prévisualisation du build** :
+  ```bash
+  npm run preview
+  ```
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Connexion et comptes
+- **Administrateur** :
+  - Email : `admin@sge.com`
+  - Mot de passe : `Admin123!`
+- **Utilisateur** : utiliser le formulaire d'inscription pour créer un compte en renseignant email, mot de passe et l'identifiant de l'employé rattaché (champ `employeeId`). Une fois le compte créé, la connexion se fait avec l'email et le mot de passe saisis.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Configuration de l'API
+- L'URL de base par défaut est `/api` (ou `http://localhost:5171/api` en développement si vous contournez le proxy).
+- Vous pouvez tester ou mettre à jour l'URL de l'API depuis la modale « Paramètres API » accessible via la barre supérieure.
+- Les appels HTTP sont gérés par `src/HTTP/httpClient.ts` (Axios + gestion du token d'accès). L'URL courante est mémorisée dans le localStorage (`appRH_api_base_url`).
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Architecture du projet
+- **Entrée** : `src/main.tsx` monte `App.tsx` et charge les styles globaux.
+- **Composants** : organisation par domaine sous `src/components/` (auth, layout, dashboard, employees, departments, attendances). `DashboardLayout` orchestre les vues principales (départements, employés, présences) et les actions d'import/export.
+- **État global** : `src/store/useAppStore.ts` assemble des *slices* Zustand pour l'authentification, les préférences, le dashboard et les données métiers (`src/store/slices/*`). Les préférences (mode d'affichage, base URL) sont persistées.
+- **Services** :
+  - `src/services/auth.service.ts` : gestion du cycle de login/refresh/logout et stockage du refresh token dans un cookie.
+  - `src/services/toasts.service.ts` : notifications utilisateur.
+- **Hooks et utilitaires** :
+  - `src/hooks/useFeatureReminder.ts` : rappel des fonctionnalités manquantes côté API.
+  - `src/utils/errorHandling.ts`, `src/utils/decode.ts` : normalisation des erreurs et validation Zod des réponses API.
+- **Interfaces / codecs** : définitions Zod dans `src/interfaces` (auth, employés, départements, présences, absences) utilisées pour typer et valider les échanges réseau.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Fonctionnalités clés
+- Authentification avec rafraîchissement automatique du token et formulaire d'inscription/connexion.
+- Tableau de bord basculant entre départements, employés et présences avec création/édition/suppression.
+- Import/Export des employés via fichiers (Excel/CSV) lorsque l'API fichier est disponible.
+- Paramétrage dynamique de l'URL d'API et détection de santé des services.
+- Notifications toast pour les actions (authentification, import/export, erreurs).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Structure des styles
+Les styles globaux se trouvent dans `src/index.css` et `src/App.css`, combinant Tailwind (via `@tailwindcss/vite`) et classes utilitaires personnalisées.
