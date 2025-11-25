@@ -8,8 +8,11 @@ import {
     type AttendanceUpdate,
 } from "../interfaces/attendance.codec.ts";
 import { decode } from "../utils/decode.ts";
+import { formatDateTime } from "../utils/dateFormat.ts";
 
 export const baseURLAttendance = "attendances";
+
+const formatAttendanceDate = (value: string | number | Date): string => formatDateTime(value);
 
 export const AttendanceAPI = {
     async getAll(): Promise<AttendanceAPI[]> {
@@ -27,9 +30,13 @@ export const AttendanceAPI = {
         return decode(attendanceAPICodec.array(), data, "AttendanceAPI.getByEmployee");
     },
 
-    async getByEmployeeAndDate(employeeId: number, date: string): Promise<AttendanceAPI[]> {
+    async getByEmployeeAndDate(
+        employeeId: number,
+        date: string | number | Date
+    ): Promise<AttendanceAPI[]> {
+        const formattedDate = encodeURIComponent(formatAttendanceDate(date));
         const data = await apiClient.get<unknown>(
-            `/${baseURLAttendance}/employee/${employeeId}/date/${date}`
+            `/${baseURLAttendance}/employee/${employeeId}/date/${formattedDate}`
         );
         return decode(
             attendanceAPICodec.array(),
@@ -38,9 +45,14 @@ export const AttendanceAPI = {
         );
     },
 
-    async getByDateRange(startDate: string, endDate: string): Promise<AttendanceAPI[]> {
+    async getByDateRange(
+        startDate: string | number | Date,
+        endDate: string | number | Date
+    ): Promise<AttendanceAPI[]> {
+        const formattedStart = encodeURIComponent(formatAttendanceDate(startDate));
+        const formattedEnd = encodeURIComponent(formatAttendanceDate(endDate));
         const data = await apiClient.get<unknown>(
-            `/${baseURLAttendance}/date-range?startDate=${startDate}&endDate=${endDate}`
+            `/${baseURLAttendance}/date-range?startDate=${formattedStart}&endDate=${formattedEnd}`
         );
         return decode(attendanceAPICodec.array(), data, "AttendanceAPI.getByDateRange");
     },
@@ -51,7 +63,11 @@ export const AttendanceAPI = {
             attendance,
             "AttendanceAPI.create.payload"
         );
-        const created = await apiClient.post<unknown>(`/${baseURLAttendance}`, payload);
+        const formattedPayload = {
+            ...payload,
+            date: formatAttendanceDate(payload.date),
+        };
+        const created = await apiClient.post<unknown>(`/${baseURLAttendance}`, formattedPayload);
         return decode(attendanceAPICodec, created, "AttendanceAPI.create.response");
     },
 
@@ -61,7 +77,11 @@ export const AttendanceAPI = {
             attendance,
             "AttendanceAPI.update.payload"
         );
-        const updated = await apiClient.put<unknown>(`/${baseURLAttendance}/${id}`, payload);
+        const formattedPayload = {
+            ...payload,
+            date: payload.date ? formatAttendanceDate(payload.date) : undefined,
+        };
+        const updated = await apiClient.put<unknown>(`/${baseURLAttendance}/${id}`, formattedPayload);
 
         const parsed = attendanceAPICodec.safeParse(updated);
         if (parsed.success) {

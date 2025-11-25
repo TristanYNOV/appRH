@@ -57,7 +57,20 @@ export const EmployeeAPI = {
         };
 
         const updated = await apiClient.put<unknown>(`/${baseURLEmployee}/${id}`, formattedPayload);
-        return decode(EmployeeAPICodec, updated, "EmployeeAPI.update.response");
+
+        const parsed = EmployeeAPICodec.safeParse(updated);
+        if (parsed.success) {
+            return parsed.data;
+        }
+
+        if (typeof updated === "string" || updated == null) {
+            return this.getById(id);
+        }
+
+        console.error(`[DECODE][EmployeeAPI.update.response]`, parsed.error.format());
+        throw new Error(
+            "Les données reçues pour EmployeeAPI.update.response ne respectent pas le contrat attendu."
+        );
     },
 
     async remove(id: number): Promise<void> {
