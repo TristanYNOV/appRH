@@ -16,11 +16,7 @@ export const createAttendanceSlice: StoreCreator<AttendanceSlice> = (set, get) =
 
     const refreshAttendances = async () => {
         set({ isLoadingAttendances: true });
-        const healthy = await checkHealth();
-        if (!healthy) {
-            set({ isLoadingAttendances: false });
-            return false;
-        }
+        await checkHealth();
 
         try {
             const data = await AttendanceAPI.getAll();
