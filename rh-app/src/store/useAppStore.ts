@@ -29,7 +29,6 @@ export const useAppStore = create<AppState>()(
             partialize: (state) => ({
                 apiBaseUrl: state.apiBaseUrl,
                 displayMode: state.displayMode,
-                isAuthenticated: state.isAuthenticated,
             }),
         }
     )
