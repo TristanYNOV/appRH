@@ -16,11 +16,7 @@ export const createDepartmentSlice: StoreCreator<DepartmentSlice> = (set, get) =
 
     const refreshDepartments = async () => {
         set({ isLoadingDepartments: true });
-        const healthy = await checkHealth();
-        if (!healthy) {
-            set({ isLoadingDepartments: false });
-            return false;
-        }
+        await checkHealth();
 
         try {
             const data = await DepartmentAPI.getAll();

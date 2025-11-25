@@ -15,10 +15,13 @@ import type {
     CreateDepartmentPayload,
     UpdateDepartmentPayload,
 } from "./interfaces/department.codec.ts";
+import type {
+    AttendanceCreate,
+    AttendanceUpdate,
+} from "./interfaces/attendance.codec.ts";
 import type { CreateEmployeePayload, UpdateEmployeePayload } from "./interfaces/employee.codec.ts";
 import type { LeaveRequest } from "./interfaces/leaveRequest.codec.ts";
 
-const ATTENDANCE_API_AVAILABLE = false;
 const LEAVE_API_AVAILABLE = false;
 
 function App() {
@@ -32,11 +35,17 @@ function App() {
         displayMode,
         setDisplayMode,
         employees,
+        attendances,
         isLoadingEmployees,
+        isLoadingAttendances,
         isEmployeeApiAvailable,
+        isAttendanceApiAvailable,
         createEmployee,
         updateEmployee,
         deleteEmployee,
+        createAttendance,
+        updateAttendance,
+        deleteAttendance,
         departments,
         isLoadingDepartments,
         isDepartmentApiAvailable,
@@ -53,6 +62,7 @@ function App() {
         exportEmployees,
         exportDepartments,
         loadEmployees,
+        loadAttendances,
         loadDepartments,
         checkFileAvailability,
         resetAfterLogout,
@@ -66,7 +76,6 @@ function App() {
     const [isSavingApiSettings, setIsSavingApiSettings] = useState(false);
     const [apiSettingsError, setApiSettingsError] = useState<string | null>(null);
     const missingFeatures = [
-        !ATTENDANCE_API_AVAILABLE ? "présences" : null,
         !LEAVE_API_AVAILABLE ? "demandes d'absence" : null,
     ].filter((feature): feature is string => feature !== null);
     const featureReminder = useFeatureReminder(isAuthenticated, missingFeatures);
@@ -78,12 +87,14 @@ function App() {
     const disableDepartmentImport = !isFileApiAvailable || isImportingDepartments;
     const disableEmployeeExport = !isFileApiAvailable || isExportingEmployees;
     const disableDepartmentExport = !isFileApiAvailable || isExportingDepartments;
-    const disableAttendanceActions =
-        !ATTENDANCE_API_AVAILABLE || !isEmployeeApiAvailable;
-    const disableLeaveActions = !ATTENDANCE_API_AVAILABLE || !isEmployeeApiAvailable;
+    const disableAttendanceActions = !isAttendanceApiAvailable || !isEmployeeApiAvailable;
+    const disableLeaveActions = !LEAVE_API_AVAILABLE || !isEmployeeApiAvailable;
 
     const hasApiIssue =
-        !isEmployeeApiAvailable || !isDepartmentApiAvailable || !isFileApiAvailable;
+        !isEmployeeApiAvailable ||
+        !isAttendanceApiAvailable ||
+        !isDepartmentApiAvailable ||
+        !isFileApiAvailable;
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -92,9 +103,17 @@ function App() {
         }
 
         void loadEmployees();
+        void loadAttendances();
         void loadDepartments();
         void checkFileAvailability();
-    }, [checkFileAvailability, isAuthenticated, loadDepartments, loadEmployees, resetAfterLogout]);
+    }, [
+        checkFileAvailability,
+        isAuthenticated,
+        loadAttendances,
+        loadDepartments,
+        loadEmployees,
+        resetAfterLogout,
+    ]);
 
     const handleAuth = async (email: string, password: string, mode: "login" | "signup") => {
         const toastId = toastService.authAttempt();
@@ -175,6 +194,18 @@ function App() {
 
     const handleDeleteDepartment = async (id: number) => {
         await deleteDepartment(id);
+    };
+
+    const handleCreateAttendance = async (attendance: AttendanceCreate) => {
+        await createAttendance(attendance);
+    };
+
+    const handleUpdateAttendance = async (id: number, attendance: AttendanceUpdate) => {
+        await updateAttendance(id, attendance);
+    };
+
+    const handleDeleteAttendance = async (id: number) => {
+        await deleteAttendance(id);
     };
 
     const handleCreateLeaveRequest = (_employeeId: number, _leave: LeaveRequest) => {
@@ -276,14 +307,19 @@ function App() {
                     displayMode={displayMode}
                     onDisplayModeChange={(mode) => setDisplayMode(mode)}
                     employees={employees}
+                    attendances={attendances}
                     departments={departments}
                     isLoadingEmployees={isLoadingEmployees}
+                    isLoadingAttendances={isLoadingAttendances}
                     isLoadingDepartments={isLoadingDepartments}
                     isEmployeeApiAvailable={isEmployeeApiAvailable}
                     isDepartmentApiAvailable={isDepartmentApiAvailable}
                     onCreateEmployee={handleCreateEmployee}
                     onUpdateEmployee={handleUpdateEmployee}
                     onDeleteEmployee={handleDeleteEmployee}
+                    onCreateAttendance={handleCreateAttendance}
+                    onUpdateAttendance={handleUpdateAttendance}
+                    onDeleteAttendance={handleDeleteAttendance}
                     onCreateDepartment={handleCreateDepartment}
                     onUpdateDepartment={handleUpdateDepartment}
                     onDeleteDepartment={handleDeleteDepartment}

@@ -7,9 +7,8 @@ const timeStringSchema = z
         "Doit être au format HH:MM:SS"
     );
 
-export const attendanceAPICodec = z.object({
+const attendanceBase = {
     id: z.number().int(),
-    date: z.string().datetime(),     // "2025-11-26T19:50:34.44Z"
     clockIn: timeStringSchema,
     clockOut: timeStringSchema,
     breakDuration: timeStringSchema,
@@ -18,11 +17,22 @@ export const attendanceAPICodec = z.object({
     notes: z.string().nullable().optional(),
     employeeId: z.number().int(),
     employeeName: z.string(),
+};
+
+export const attendanceAPICodec = z.object({
+    ...attendanceBase,
+    date: z.string().datetime(), // "2025-11-26T19:50:34.44Z"
 });
 export type AttendanceAPI = z.infer<typeof attendanceAPICodec>;
 
+export const attendanceCodec = z.object({
+    ...attendanceBase,
+    date: z.coerce.date(),
+});
+export type Attendance = z.infer<typeof attendanceCodec>;
+
 export const attendanceCreateCodec = z.object({
-    date: z.string().datetime(),     // "2025-11-26T19:50:34.4400000Z"
+    date: z.string().datetime(), // "2025-11-26T19:50:34.4400000Z"
     clockIn: timeStringSchema,
     clockOut: timeStringSchema,
     breakDuration: timeStringSchema,

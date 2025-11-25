@@ -5,7 +5,8 @@ import type { AppState, StoreGet, StoreSet } from "../types.ts";
 type AvailabilityKey =
     | "isEmployeeApiAvailable"
     | "isDepartmentApiAvailable"
-    | "isFileApiAvailable";
+    | "isFileApiAvailable"
+    | "isAttendanceApiAvailable";
 
 export const createAvailabilityHelpers = (
     label: string,

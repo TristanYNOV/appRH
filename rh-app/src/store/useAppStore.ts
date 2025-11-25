@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 import { createAuthSlice } from "./slices/authSlice.ts";
+import { createAttendanceSlice } from "./slices/attendanceSlice.ts";
 import { createDashboardSlice } from "./slices/dashboardSlice.ts";
 import { createDepartmentSlice } from "./slices/departmentSlice.ts";
 import { createEmployeeSlice } from "./slices/employeeSlice.ts";
@@ -17,6 +18,7 @@ export const useAppStore = create<AppState>()(
             ...createPreferenceSlice(...args),
             ...createAuthSlice(...args),
             ...createDashboardSlice(...args),
+            ...createAttendanceSlice(...args),
             ...createEmployeeSlice(...args),
             ...createDepartmentSlice(...args),
             ...createFileTransferSlice(...args),

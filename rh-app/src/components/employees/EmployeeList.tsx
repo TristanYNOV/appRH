@@ -7,7 +7,7 @@ import {
     type Employee,
     type UpdateEmployeePayload,
 } from "../../interfaces/employee.codec.ts";
-import type { Attendance } from "../../interfaces/attendance.codec.ts";
+import type { Attendance, AttendanceCreate, AttendanceUpdate } from "../../interfaces/attendance.codec.ts";
 import type { Department } from "../../interfaces/department.codec.ts";
 import type { LeaveRequest } from "../../interfaces/leaveRequest.codec.ts";
 import EmployeeFormModal, { type EmployeeFormValues } from "./modals/EmployeeFormModal.tsx";
@@ -16,12 +16,15 @@ import EmployeeLeaveModal from "./modals/EmployeeLeaveModal.tsx";
 
 type Props = {
     employees: Employee[];
+    attendances?: Attendance[];
     departments?: Department[];
     onCreate?: (emp: CreateEmployeePayload) => void;
     onUpdate?: (id: number, emp: UpdateEmployeePayload) => void;
     onDelete?: (id: number) => void;
     onCreateLeaveRequest?: (employeeId: number, leave: LeaveRequest) => void;
-    onCreateAttendance?: (employeeId: number, attendance: Attendance) => void;
+    onCreateAttendance?: (attendance: AttendanceCreate) => void;
+    onUpdateAttendance?: (id: number, attendance: AttendanceUpdate) => void;
+    onDeleteAttendance?: (id: number) => void;
     isLoading?: boolean;
     disableCrudActions?: boolean;
     disableAttendanceActions?: boolean;
@@ -36,11 +39,15 @@ type ModalState =
 
 const EmployeeList: React.FC<Props> = ({
     employees,
+    attendances = [],
     departments,
     onCreate,
     onUpdate,
     onDelete,
     onCreateLeaveRequest,
+    onCreateAttendance,
+    onUpdateAttendance,
+    onDeleteAttendance,
     isLoading = false,
     disableCrudActions = false,
     disableAttendanceActions = false,
@@ -176,6 +183,21 @@ const EmployeeList: React.FC<Props> = ({
     const handleLeaveSubmit = (employeeId: number, leave: LeaveRequest) => {
         if (onCreateLeaveRequest) onCreateLeaveRequest(employeeId, leave);
         else console.log("Create leave request:", employeeId, leave);
+    };
+
+    const handleCreateAttendance = (attendance: AttendanceCreate) => {
+        if (onCreateAttendance) onCreateAttendance(attendance);
+        else console.log("Create attendance:", attendance);
+    };
+
+    const handleUpdateAttendance = (id: number, attendance: AttendanceUpdate) => {
+        if (onUpdateAttendance) onUpdateAttendance(id, attendance);
+        else console.log("Update attendance:", id, attendance);
+    };
+
+    const handleDeleteAttendance = (id: number) => {
+        if (onDeleteAttendance) onDeleteAttendance(id);
+        else console.log("Delete attendance:", id);
     };
 
     return (
@@ -321,7 +343,13 @@ const EmployeeList: React.FC<Props> = ({
             <EmployeeAttendanceModal
                 isOpen={modal.type === "attendance"}
                 employee={selectedEmployee}
+                employees={employees}
+                attendances={attendances}
+                disableActions={disableAttendanceActions}
                 onClose={() => setModal({ type: "none" })}
+                onCreateAttendance={handleCreateAttendance}
+                onUpdateAttendance={handleUpdateAttendance}
+                onDeleteAttendance={handleDeleteAttendance}
             />
 
             <EmployeeLeaveModal
