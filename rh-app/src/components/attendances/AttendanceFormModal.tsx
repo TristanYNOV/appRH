@@ -77,14 +77,22 @@ const AttendanceFormModal = ({
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        const payload: AttendanceCreate = {
+        const sanitizedNotes = values.notes.trim();
+
+        const payload: AttendanceCreate | AttendanceUpdate = {
             date: new Date(values.date).toISOString(),
             clockIn: values.clockIn,
             clockOut: values.clockOut,
             breakDuration: values.breakDuration,
-            notes: values.notes.trim() === "" ? null : values.notes,
             employeeId: Number(values.employeeId),
         };
+
+        if (sanitizedNotes !== "") {
+            payload.notes = sanitizedNotes;
+        } else if (mode === "edit") {
+            // Allow clearing an existing note when updating
+            payload.notes = null;
+        }
 
         onSubmit(payload);
         onClose();
