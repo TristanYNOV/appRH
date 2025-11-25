@@ -322,11 +322,11 @@ function App() {
                     <span className="text-center">Merci de vous authentifier !</span>
                     <div className="flex gap-4 mt-8">
                         <span className="text-center">Email:</span>
-                        <span className="text-center">Graou@minou.miaou</span>
+                        <span className="text-center">admin@sge.com</span>
                     </div>
                     <div className="flex gap-4">
-                        <span className="text-center">Mot de passse:</span>
-                        <span className="text-center">Graou</span>
+                        <span className="text-center">Mot de passe:</span>
+                        <span className="text-center">Admin123!</span>
                     </div>
                 </div>
             )}

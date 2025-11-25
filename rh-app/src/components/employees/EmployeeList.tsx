@@ -210,12 +210,12 @@ const EmployeeList: React.FC<Props> = ({
                         setEmployeeForm({ mode: "create" });
                     }}
                     disabled={disableCrudActions}
-                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 ${
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 ${
                         disableCrudActions ? " opacity-60 cursor-not-allowed" : ""
                     }`}
                 >
                     <FaPlus />
-                    Nouveau
+                    Nouveau employé
                 </button>
             </div>
 

@@ -89,7 +89,7 @@ const DepartmentList: React.FC<Props> = ({
                         setModal({ mode: "create" });
                     }}
                     disabled={actionsDisabled}
-                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 ${
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 ${
                         actionsDisabled ? " opacity-60 cursor-not-allowed" : ""
                     }`}
                 >
