@@ -21,7 +21,7 @@ const attendanceBase = {
 
 export const attendanceAPICodec = z.object({
     ...attendanceBase,
-    date: z.string().datetime({ offset: false }),
+    date: z.string(),
 });
 export type AttendanceAPI = z.infer<typeof attendanceAPICodec>;
 
