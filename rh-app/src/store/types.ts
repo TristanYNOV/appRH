@@ -77,13 +77,9 @@ export interface AttendanceSlice {
 export interface FileTransferSlice {
     isFileApiAvailable: boolean;
     isImportingEmployees: boolean;
-    isImportingDepartments: boolean;
     isExportingEmployees: boolean;
-    isExportingDepartments: boolean;
     importEmployees: (file: File) => Promise<void>;
-    importDepartments: (file: File) => Promise<void>;
     exportEmployees: () => Promise<void>;
-    exportDepartments: () => Promise<void>;
     checkFileAvailability: () => Promise<boolean>;
     resetFileTransfers: () => void;
 }

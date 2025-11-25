@@ -31,6 +31,11 @@ export const DepartmentAPI = {
     async update(id: number, department: UpdateDepartmentPayload): Promise<Department> {
         const payload = decode(updateDepartmentCodec, department, "DepartmentAPI.update.payload");
         const updated = await apiClient.put<unknown>(`/${baseURLDepartment}/${id}`, payload);
+
+        if (typeof updated === "string" || updated == null) {
+            return DepartmentAPI.getById(id);
+        }
+
         return decode(DepartmentAPICodec, updated, "DepartmentAPI.update.response");
     },
 

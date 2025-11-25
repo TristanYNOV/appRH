@@ -41,17 +41,11 @@ type Props = {
     onDeleteDepartment: (id: number) => void;
     onCreateLeaveRequest: (employeeId: number, leave: LeaveRequest) => void;
     onEmployeeImportClick: () => void;
-    onDepartmentImportClick: () => void;
     onExportEmployees: () => void;
-    onExportDepartments: () => void;
     onEmployeeFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
-    onDepartmentFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
     employeeFileInputRef: RefObject<HTMLInputElement | null>;
-    departmentFileInputRef: RefObject<HTMLInputElement | null>;
     disableEmployeeImport: boolean;
-    disableDepartmentImport: boolean;
     disableEmployeeExport: boolean;
-    disableDepartmentExport: boolean;
     disableAttendanceActions: boolean;
     disableLeaveActions: boolean;
 };
@@ -78,17 +72,11 @@ const DashboardLayout = ({
     onDeleteDepartment,
     onCreateLeaveRequest,
     onEmployeeImportClick,
-    onDepartmentImportClick,
     onExportEmployees,
-    onExportDepartments,
     onEmployeeFileChange,
-    onDepartmentFileChange,
     employeeFileInputRef,
-    departmentFileInputRef,
     disableEmployeeImport,
-    disableDepartmentImport,
     disableEmployeeExport,
-    disableDepartmentExport,
     disableAttendanceActions,
     disableLeaveActions,
 }: Props) => (
@@ -105,16 +93,6 @@ const DashboardLayout = ({
                 Importer Excel — Employés
             </button>
             <button
-                onClick={onDepartmentImportClick}
-                disabled={disableDepartmentImport}
-                className={`px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50${
-                    disableDepartmentImport ? " opacity-60 cursor-not-allowed" : ""
-                }`}
-                title="Importer Excel départements"
-            >
-                Importer Excel — Départements
-            </button>
-            <button
                 onClick={onExportEmployees}
                 disabled={disableEmployeeExport}
                 className={`px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700${
@@ -124,16 +102,6 @@ const DashboardLayout = ({
             >
                 Exporter Excel — Employés
             </button>
-            <button
-                onClick={onExportDepartments}
-                disabled={disableDepartmentExport}
-                className={`px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700${
-                    disableDepartmentExport ? " opacity-60 cursor-not-allowed" : ""
-                }`}
-                title="Exporter les départements"
-            >
-                Exporter Excel — Départements
-            </button>
 
             <input
                 ref={employeeFileInputRef}
@@ -141,13 +109,6 @@ const DashboardLayout = ({
                 accept=".xlsx,.xls,.csv"
                 className="hidden"
                 onChange={onEmployeeFileChange}
-            />
-            <input
-                ref={departmentFileInputRef}
-                type="file"
-                accept=".xlsx,.xls,.csv"
-                className="hidden"
-                onChange={onDepartmentFileChange}
             />
         </div>
         <div className="flex w-full justify-center gap-2 mt-16">
