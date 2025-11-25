@@ -62,7 +62,22 @@ export const AttendanceAPI = {
             "AttendanceAPI.update.payload"
         );
         const updated = await apiClient.put<unknown>(`/${baseURLAttendance}/${id}`, payload);
-        return decode(attendanceAPICodec, updated, "AttendanceAPI.update.response");
+
+        const parsed = attendanceAPICodec.safeParse(updated);
+        if (parsed.success) {
+            return parsed.data;
+        }
+
+        if (typeof updated === "string" || updated == null) {
+            // Some backends return a confirmation string instead of the updated object.
+            // Fetch the latest value to keep the client state in sync without failing decoding.
+            return this.getById(id);
+        }
+
+        console.error(`[DECODE][AttendanceAPI.update.response]`, parsed.error.format());
+        throw new Error(
+            "Les données reçues pour AttendanceAPI.update.response ne respectent pas le contrat attendu."
+        );
     },
 
     async remove(id: number): Promise<void> {
