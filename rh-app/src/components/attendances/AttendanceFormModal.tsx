@@ -23,10 +23,14 @@ type Props = {
     defaultEmployeeId?: number;
 };
 
-const toDateTimeLocal = (date?: Date) => {
+const toDateLocal = (date?: Date) => {
     if (!date) return "";
-    const iso = date.toISOString();
-    return iso.slice(0, 16);
+    return date.toISOString().slice(0, 10);
+};
+
+const timeToSeconds = (time: string) => {
+    const [hours, minutes, seconds] = time.split(":").map(Number);
+    return hours * 3600 + minutes * 60 + seconds;
 };
 
 const AttendanceFormModal = ({
@@ -41,7 +45,7 @@ const AttendanceFormModal = ({
     const initialValues = useMemo<AttendanceFormValues>(() => {
         if (initialAttendance) {
             return {
-                date: toDateTimeLocal(initialAttendance.date),
+                date: toDateLocal(initialAttendance.date),
                 clockIn: initialAttendance.clockIn,
                 clockOut: initialAttendance.clockOut,
                 breakDuration: initialAttendance.breakDuration,
@@ -51,7 +55,7 @@ const AttendanceFormModal = ({
         }
 
         return {
-            date: toDateTimeLocal(new Date()),
+            date: toDateLocal(new Date()),
             clockIn: "09:00:00",
             clockOut: "17:00:00",
             breakDuration: "01:00:00",
@@ -75,8 +79,19 @@ const AttendanceFormModal = ({
         setValues((prev) => ({ ...prev, [name]: value }));
     };
 
+    const [error, setError] = useState<string | null>(null);
+
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        const arrival = timeToSeconds(values.clockIn);
+        const departure = timeToSeconds(values.clockOut);
+
+        if (departure <= arrival) {
+            setError("L'heure de départ doit être postérieure à l'heure d'arrivée.");
+            return;
+        }
+
+        setError(null);
         const sanitizedNotes = values.notes.trim();
 
         const payload: AttendanceCreate | AttendanceUpdate = {
@@ -117,9 +132,9 @@ const AttendanceFormModal = ({
 
                 <form onSubmit={handleSubmit} className="grid gap-4 px-6 py-4 md:grid-cols-2">
                     <label className="flex flex-col gap-2 text-sm">
-                        <span>Date et heure</span>
+                        <span>Date</span>
                         <input
-                            type="datetime-local"
+                            type="date"
                             name="date"
                             value={values.date}
                             onChange={handleChange}
@@ -198,6 +213,12 @@ const AttendanceFormModal = ({
                             placeholder="Commentaires éventuels"
                         />
                     </label>
+
+                    {error && (
+                        <div className="md:col-span-2 text-red-600 text-sm font-medium">
+                            {error}
+                        </div>
+                    )}
 
                     <div className="flex justify-end gap-3 md:col-span-2">
                         <button
