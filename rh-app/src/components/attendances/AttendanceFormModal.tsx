@@ -65,6 +65,7 @@ const AttendanceFormModal = ({
     }, [defaultEmployeeId, initialAttendance]);
 
     const [values, setValues] = useState<AttendanceFormValues>(initialValues);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         setValues(initialValues);
@@ -78,8 +79,6 @@ const AttendanceFormModal = ({
         const { name, value } = event.target;
         setValues((prev) => ({ ...prev, [name]: value }));
     };
-
-    const [error, setError] = useState<string | null>(null);
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
