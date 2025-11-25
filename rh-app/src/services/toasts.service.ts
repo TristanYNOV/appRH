@@ -1,4 +1,5 @@
 import toast from "react-hot-toast";
+import type { Attendance, AttendanceCreate, AttendanceUpdate } from "../interfaces/attendance.codec.ts";
 import type { Department } from "../interfaces/department.codec.ts";
 import type {
     CreateEmployeePayload,
@@ -15,6 +16,28 @@ const formatPerson = (employee: PersonLike) => {
     const lastName = "lastName" in employee && employee.lastName ? employee.lastName : "";
     const full = `${lastName} ${firstName}`.trim();
     return full.length > 0 ? full : "Employé";
+};
+
+type AttendanceLike =
+    | Attendance
+    | AttendanceCreate
+    | AttendanceUpdate
+    | (Attendance & { employeeFullName?: string });
+
+const formatAttendance = (attendance?: AttendanceLike) => {
+    if (!attendance) return "présence";
+    const dateValue = "date" in attendance ? attendance.date : undefined;
+    const parsedDate =
+        dateValue instanceof Date
+            ? dateValue
+            : typeof dateValue === "string"
+              ? new Date(dateValue)
+              : undefined;
+    const labelDate = parsedDate ? parsedDate.toLocaleDateString("fr-FR") : "présence";
+    const employeeName =
+        ("employeeName" in attendance && attendance.employeeName) ||
+        ("employeeFullName" in attendance && attendance.employeeFullName);
+    return employeeName ? `${labelDate} — ${employeeName}` : `Présence du ${labelDate}`;
 };
 
 export const toastService = {
@@ -72,6 +95,25 @@ export const toastService = {
     departmentDeleted: (department: Department) =>
         toast.success(`Département ${department.name} supprimé.`),
     departmentDeletionFailed: (message: string) => toast.error(`Suppression département échouée : ${message}`),
+
+    // ATTENDANCE
+    attendanceSyncFailed: (message: string) =>
+        toast.error(`Synchronisation des présences impossible : ${message}`),
+    attendanceCreation: (attendance?: AttendanceLike) =>
+        toast.loading(`Enregistrement ${formatAttendance(attendance)}…`),
+    attendanceCreated: (attendance: AttendanceLike) =>
+        toast.success(`Présence enregistrée (${formatAttendance(attendance)})`),
+    attendanceCreationFailed: (message: string) => toast.error(`Création présence échouée : ${message}`),
+    attendanceUpdate: (attendance?: AttendanceLike) =>
+        toast.loading(`Mise à jour ${formatAttendance(attendance)}…`),
+    attendanceUpdated: (attendance: AttendanceLike) =>
+        toast.success(`Présence mise à jour (${formatAttendance(attendance)})`),
+    attendanceUpdateFailed: (message: string) => toast.error(`Mise à jour présence échouée : ${message}`),
+    attendanceDeletion: (attendance?: AttendanceLike) =>
+        toast.loading(`Suppression ${formatAttendance(attendance)}…`),
+    attendanceDeleted: (attendance: AttendanceLike) =>
+        toast.success(`Présence supprimée (${formatAttendance(attendance)})`),
+    attendanceDeletionFailed: (message: string) => toast.error(`Suppression présence échouée : ${message}`),
 
     // Files
     fileImporting: (label: string) => toast.loading(`Import ${label} en cours…`),

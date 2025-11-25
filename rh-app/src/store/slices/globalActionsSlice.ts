@@ -5,12 +5,14 @@ export const createGlobalActionsSlice: StoreCreator<GlobalActions> = (set, get) 
     resetAfterLogout: () => {
         set({ displayMode: "employee" });
         get().resetEmployees();
+        get().resetAttendances();
         get().resetDepartments();
         get().resetFileTransfers();
     },
     reconnectApis: async () => {
-        const [employeeOk, departmentOk, fileOk] = await Promise.all([
+        const [employeeOk, attendanceOk, departmentOk, fileOk] = await Promise.all([
             get().checkEmployeeAvailability(),
+            get().checkAttendanceAvailability(),
             get().checkDepartmentAvailability(),
             get().checkFileAvailability(),
         ]);
@@ -18,10 +20,13 @@ export const createGlobalActionsSlice: StoreCreator<GlobalActions> = (set, get) 
         if (employeeOk) {
             void get().loadEmployees();
         }
+        if (attendanceOk) {
+            void get().loadAttendances();
+        }
         if (departmentOk) {
             void get().loadDepartments();
         }
 
-        return employeeOk && departmentOk && fileOk;
+        return employeeOk && attendanceOk && departmentOk && fileOk;
     },
 });

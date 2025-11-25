@@ -16,11 +16,7 @@ export const createEmployeeSlice: StoreCreator<EmployeeSlice> = (set, get) => {
 
     const refreshEmployees = async () => {
         set({ isLoadingEmployees: true });
-        const healthy = await checkHealth();
-        if (!healthy) {
-            set({ isLoadingEmployees: false });
-            return false;
-        }
+        await checkHealth();
 
         try {
             const data = await EmployeeAPI.getAll();

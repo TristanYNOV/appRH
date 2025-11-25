@@ -1,5 +1,6 @@
 import type { StateCreator } from "zustand";
 
+import type { Attendance, AttendanceCreate, AttendanceUpdate } from "../interfaces/attendance.codec.ts";
 import type {
     CreateDepartmentPayload,
     Department,
@@ -12,7 +13,7 @@ import type {
 } from "../interfaces/employee.codec.ts";
 import type { LeaveRequest } from "../interfaces/leaveRequest.codec.ts";
 
-export type DisplayMode = "employee" | "department";
+export type DisplayMode = "employee" | "department" | "attendance";
 export type AuthMode = "login" | "signup" | null;
 
 export interface PreferenceSlice {
@@ -58,6 +59,18 @@ export interface DepartmentSlice {
     resetDepartments: () => void;
 }
 
+export interface AttendanceSlice {
+    attendances: Attendance[];
+    isLoadingAttendances: boolean;
+    isAttendanceApiAvailable: boolean;
+    loadAttendances: () => Promise<boolean>;
+    createAttendance: (attendance: AttendanceCreate) => Promise<void>;
+    updateAttendance: (id: number, attendance: AttendanceUpdate) => Promise<void>;
+    deleteAttendance: (id: number) => Promise<void>;
+    checkAttendanceAvailability: () => Promise<boolean>;
+    resetAttendances: () => void;
+}
+
 export interface FileTransferSlice {
     isFileApiAvailable: boolean;
     isImportingEmployees: boolean;
@@ -82,6 +95,7 @@ export type AppState = PreferenceSlice &
     DashboardSlice &
     EmployeeSlice &
     DepartmentSlice &
+    AttendanceSlice &
     FileTransferSlice &
     GlobalActions;
 
